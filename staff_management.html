@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nightbaby | Staff Management</title>
+    <style>
+        html { opacity: 1; visibility: visible; }
+        body { opacity: 1; }
+    </style>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -77,12 +81,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="user-management-section dashboard-card"><div class="section-header panel-header"><h2>Staff Accounts</h2><button type="button" class="primary-btn" id="addUserButton">+ Add Staff</button></div><div class="alert-table-wrapper"><table class="alert-table user-table"><thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTableBody"></tbody></table></div></div>
-                <div class="account-modal-overlay" id="userModal" hidden><section class="account-modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle"><div class="account-modal-header"><h2 id="userModalTitle">Add Staff</h2><button type="button" class="pos-modal-close" id="closeUserModal">&times;</button></div><form id="userForm" class="account-form"><input type="hidden" id="editingUsername"><div class="form-group"><label for="userUsername">Username</label><input id="userUsername" required autocomplete="username"></div><div class="form-group"><label for="accountHolderName">Account Holder Name</label><input id="accountHolderName" type="text" required autocomplete="name" placeholder="Enter full name"></div><div class="form-group"><label for="userRole">Role</label><select id="userRole" required><option value="cashier">Cashier</option><option value="admin">Admin</option><option value="it">Super User</option></select></div><div class="form-group"><label for="userPassword">Password</label><input id="userPassword" type="password" autocomplete="new-password"></div><p class="account-form-error" id="userFormError" role="alert"></p><div class="account-modal-footer"><button type="button" class="modal-btn-cancel" id="cancelUserModal">Cancel</button><button type="submit" class="modal-btn-confirm">Save Staff</button></div></form></section></div>
-                <footer class="dashboard-footer"><p>nightbaby™ @2026 | LLC Registered</p></footer>
+                <div class="user-management-section dashboard-card"><div class="section-header panel-header"><h2>Accounts</h2><button type="button" class="primary-btn" id="addUserButton">+ Add Staff</button></div><div class="alert-table-wrapper"><table class="alert-table user-table"><thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTableBody"></tbody></table></div></div>
+                <div class="account-modal-overlay" id="userModal" hidden><section class="account-modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle"><div class="account-modal-header"><h2 id="userModalTitle">Add Staff</h2><button type="button" class="pos-modal-close" id="closeUserModal">&times;</button></div><form id="userForm" class="account-form"><input type="hidden" id="editingUsername"><div class="form-group"><label for="userUsername">Username</label><input id="userUsername" required autocomplete="username"></div><div class="form-group"><label for="accountHolderName">Account Holder Name</label><input id="accountHolderName" type="text" required autocomplete="name" placeholder="Enter full name"></div><div class="form-group"><label for="userRole">Role</label><select id="userRole" required><option value="cashier">Cashier</option><option value="admin">Admin</option><option value="super_admin">Super Admin</option></select></div><div class="form-group"><label for="userPassword">Password</label><input id="userPassword" type="password" autocomplete="new-password"><small>Required when creating new staff.</small></div><p class="account-form-error" id="userFormError" role="alert"></p><div class="account-modal-footer"><button type="button" class="modal-btn-cancel" id="cancelUserModal">Cancel</button><button type="submit" class="modal-btn-confirm">Save Staff</button></div></form></section></div>
+                <div class="user-management-section dashboard-card"><div class="section-header panel-header"><h2>Cashier Remittance Status</h2></div><div class="alert-table-wrapper remit-table-wrap"><table class="alert-table remit-table"><thead><tr><th>Cashier Name</th><th>Status</th><th>Expected</th><th>Remitted</th><th>Difference</th></tr></thead><tbody id="remitStatusTbody"></tbody></table></div></div>
+<div class="account-modal-overlay" id="remitRecordModal" hidden><section class="account-modal" role="dialog" aria-modal="true" aria-labelledby="remitRecordTitle"><div class="account-modal-header"><h2 id="remitRecordTitle">Remittance Record</h2><button type="button" class="pos-modal-close" id="remitRecordClose">&times;</button></div><div class="account-modal-body"><div id="remitRecordBody"></div></div><div class="account-modal-footer"><button type="button" class="modal-btn-cancel" id="remitRecordCloseBtn">Close</button></div></section></div>
+<footer class="dashboard-footer"><p>nightbaby™ @2026 | LLC Registered</p></footer>
             </main>
         </div>
     </div>
-    <script src="js/global.js"></script><script src="js/account_management.js?v=3"></script>
+    <script src="js/global.js"></script><script src="js/account_management.js"></script>
+    <script src="js/access_control.js"></script>
 </body>
 </html>

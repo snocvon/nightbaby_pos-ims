@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nightbaby | Transaction</title>
+    <style>
+        html { opacity: 1; visibility: visible; }
+        body { opacity: 1; }
+    </style>
     <link rel="stylesheet" href="css/style.css" />
     <link rel="icon" type="image/ico" href="images/favicon.ico" />
 </head>
@@ -80,7 +84,6 @@
                         </div>
                     </div>
                 </div>
-<!-- ditomuna -->
                 <div class="transactions-content">
                     <div class="transactions-stats">
                         <div class="trans-stat-card">
@@ -122,7 +125,6 @@
                             </div>
                         </div>
                     </div>
-<!-- filters -->
                     <div class="transactions-filters">
                         <div class="filter-group">
                             <label>Type</label>
@@ -139,9 +141,8 @@
                             <select class="filter-select">
                                 <option>All Status</option>
                                 <option>Completed</option>
-                                <option>In Production</option>
-                                <option>Ready for Pickup</option>
                                 <option>Refunded</option>
+                                <option>Partially Refunded</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -175,14 +176,12 @@
                             </div>
                         </div>
                     </div>
-<!-- tables -->
                     <div class="transactions-table-wrapper">
                         <table class="transactions-table">
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Date & Time</th>
-                                    <th>Customer</th>
+                                    <th>Date &amp; Time</th>
                                     <th>Type</th>
                                     <th>Cashier</th>
                                     <th>Items</th>
@@ -205,6 +204,42 @@
                     </div>
                 </div>
 
+                <div class="account-modal-overlay tx-detail-overlay" id="txDetailOverlay" hidden>
+                    <section class="account-modal" role="dialog" aria-modal="true" aria-labelledby="txDetailTitle">
+                        <div class="tx-detail-header">
+                            <h2 id="txDetailTitle">Transaction #<span id="txDetailId">--</span></h2>
+                            <button type="button" class="tx-detail-close" id="closeTxDetail" aria-label="Close">&times;</button>
+                        </div>
+                        <div class="tx-detail-body">
+                            <div class="tx-detail-row">
+                                <span class="tx-detail-label">Cashier</span>
+                                <span class="tx-detail-value" id="txDetailCashier">--</span>
+                            </div>
+                            <div class="tx-detail-section">
+                                <div class="tx-detail-section-title">Items</div>
+                                <table class="tx-detail-items">
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Qty</th>
+                                            <th class="tx-price">Unit</th>
+                                            <th class="tx-price">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="txDetailItemsBody"></tbody>
+                                </table>
+                            </div>
+                            <div class="tx-detail-row tx-detail-total">
+                                <span>Grand Total</span>
+                                <span id="txDetailGrandTotal">--</span>
+                            </div>
+                            <div class="tx-detail-actions">
+                                <button type="button" class="tx-detail-close" id="txDetailCloseBtn">Close</button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
                 <footer class="dashboard-footer">
                     <p>nightbaby™ @2026 | LLC Registered</p>
                 </footer>
@@ -213,6 +248,7 @@
     </div>
 
     <script src="js/global.js"></script>
+    <script src="js/access_control.js"></script>
     <script src="js/transactions.js"></script>
 </body>
 </html>

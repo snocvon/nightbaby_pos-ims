@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
     var adDuration = 7000;
+    var pollIntervalMs = 800;
     var customerWelcome = document.getElementById('customerWelcome');
     var customerCheckout = document.getElementById('customerCheckout');
     var customerAds = document.getElementById('customerAds');
     var customerAdPanel = document.querySelector('.customer-ad-panel');
-    var customerStoreName = document.getElementById('customerStoreName');
-    var checkoutStoreName = document.getElementById('checkoutStoreName');
     var customerItemCount = document.getElementById('customerItemCount');
     var customerItems = document.getElementById('customerItems');
     var customerSubtotal = document.getElementById('customerSubtotal');
@@ -16,16 +15,24 @@ document.addEventListener('DOMContentLoaded', function () {
     var customerAdCopy = document.getElementById('customerAdCopy');
     var customerAdImage = document.getElementById('customerAdImage');
     var customerAdProgress = document.getElementById('customerAdProgress');
-    var lastSnapshot = null;
+    var lastSnapshotKey = '';
+    var lastUpdatedAt = 0;
     var ads = [];
     var adIndex = 0;
-    var adTimer;
+    var adTimer = null;
+    var pollTimer = null;
+    var currentMode = 'init';
 
     function readSnapshot() {
         try {
-            return JSON.parse(localStorage.getItem('nb_customer_display') || '{}');
+            var raw = localStorage.getItem('nb_customer_display');
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return null;
+            if (!parsed.items || !Array.isArray(parsed.items)) parsed.items = [];
+            return parsed;
         } catch (error) {
-            return {};
+            return null;
         }
     }
 
@@ -61,60 +68,114 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderAd() {
-        var ad = ads[adIndex] || ads[0];
+        if (!customerAdTitle || !customerAdCopy || !customerAdProgress || !customerAdImage) return;
+        var ad = ads[adIndex] || ads[0] || { title: '', copy: '', image: '' };
         customerAdTitle.textContent = ad.title;
         customerAdCopy.textContent = ad.copy;
-        customerAdProgress.textContent = String(adIndex + 1).padStart(2, '0') + ' / ' + String(ads.length).padStart(2, '0');
+        customerAdProgress.textContent = String(adIndex + 1).padStart(2, '0') + ' / ' + String(ads.length || 1).padStart(2, '0');
         customerAdImage.hidden = !ad.image;
-        if (ad.image) customerAdImage.src = ad.image;
+        if (ad.image) {
+            customerAdImage.onerror = function () { this.style.display = 'none'; };
+            customerAdImage.src = ad.image;
+        }
     }
 
     function showAds() {
-        customerWelcome.hidden = false;
-        customerCheckout.hidden = true;
-        customerAds.hidden = false;
-        customerAdPanel.hidden = false;
+        if (currentMode === 'ads') return;
+        currentMode = 'ads';
+        stopAds();
+        if (customerWelcome) customerWelcome.hidden = false;
+        if (customerCheckout) customerCheckout.hidden = true;
+        if (customerAds) customerAds.hidden = false;
+        if (customerAdPanel) customerAdPanel.hidden = false;
         ads = getAds();
         adIndex = 0;
         renderAd();
-        clearInterval(adTimer);
         adTimer = setInterval(function () {
+            if (!ads.length) return;
             adIndex = (adIndex + 1) % ads.length;
             renderAd();
         }, adDuration);
     }
 
     function stopAds() {
-        clearInterval(adTimer);
-        adTimer = null;
+        if (adTimer) {
+            clearInterval(adTimer);
+            adTimer = null;
+        }
     }
 
     function showCheckout(snapshot) {
+        currentMode = 'checkout';
         stopAds();
-        customerAds.hidden = true;
-        customerWelcome.hidden = true;
-        customerCheckout.hidden = false;
-        customerItemCount.textContent = (snapshot.itemCount || 0) + ' items';
-        customerItems.innerHTML = snapshot.items && snapshot.items.length ? snapshot.items.map(function (item) {
-            return '<div class="customer-item"><div><strong>' + escapeHtml(item.name) + '</strong><span>' + item.quantity + ' x ' + formatCurrency(item.price) + '</span></div><strong>' + formatCurrency(item.price * item.quantity) + '</strong></div>';
-        }).join('') : '<p class="customer-empty">No items scanned yet.</p>';
-        customerSubtotal.textContent = formatCurrency(snapshot.subtotal || 0);
-        customerDiscount.textContent = snapshot.discount > 0 ? '-' + formatCurrency(snapshot.discount) : formatCurrency(0);
-        customerTax.textContent = formatCurrency(snapshot.tax || 0);
-        customerTotal.textContent = formatCurrency(snapshot.total || 0);
+        if (customerAds) customerAds.hidden = true;
+        if (customerWelcome) customerWelcome.hidden = true;
+        if (customerCheckout) customerCheckout.hidden = false;
+
+        var itemCount = Number(snapshot.itemCount) || 0;
+        if (customerItemCount) {
+            customerItemCount.textContent = itemCount + (itemCount === 1 ? ' item' : ' items');
+        }
+        var items = snapshot.items && snapshot.items.length ? snapshot.items : [];
+        if (customerItems) {
+            if (items.length === 0) {
+                customerItems.innerHTML = '<p class="customer-empty">No items scanned yet.</p>';
+            } else {
+                var html = '';
+                for (var i = 0; i < items.length; i++) {
+                    var it = items[i];
+                    var price = Number(it.price) || 0;
+                    var qty = Number(it.quantity) || 0;
+                    var lineTotal = price * qty;
+                    html += '' +
+                        '<div class="customer-item">' +
+                        '    <div>' +
+                        '        <strong>' + escapeHtml(it.name || 'Item') + '</strong>' +
+                        '        <span>' + escapeHtml(String(qty)) + ' x ' + formatCurrency(price) + '</span>' +
+                        '    </div>' +
+                        '    <strong>' + formatCurrency(lineTotal) + '</strong>' +
+                        '</div>';
+                }
+                customerItems.innerHTML = html;
+            }
+        }
+        if (customerSubtotal) customerSubtotal.textContent = formatCurrency(Number(snapshot.subtotal) || 0);
+        if (customerDiscount) {
+            var disc = Number(snapshot.discount) || 0;
+            customerDiscount.textContent = disc > 0 ? '-' + formatCurrency(disc) : formatCurrency(0);
+        }
+        if (customerTax) customerTax.textContent = formatCurrency(Number(snapshot.tax) || 0);
+        if (customerTotal) customerTotal.textContent = formatCurrency(Number(snapshot.total) || 0);
     }
 
-    function showWelcome(snapshot) {
-        stopAds();
-        customerCheckout.hidden = true;
-        customerAds.hidden = false;
-        customerAdPanel.hidden = true;
-        customerWelcome.hidden = false;
+    function snapshotChanged(snapshot) {
+        if (!snapshot) return false;
+        var ts = Number(snapshot.updatedAt) || 0;
+        if (ts !== lastUpdatedAt) return true;
+        var key = (snapshot.items || []).map(function (i) {
+            return (i.id || '') + '|' + (i.quantity || 0);
+        }).join('__') + '__' + (snapshot.total || 0);
+        if (key !== lastSnapshotKey) return true;
+        return false;
     }
 
-    function refresh(snapshot) {
-        lastSnapshot = snapshot;
-        if (snapshot.items && snapshot.items.length) {
+    function refreshIfChanged() {
+        var snapshot = readSnapshot();
+        if (!snapshot) {
+            if (currentMode !== 'ads') showAds();
+            lastSnapshotKey = '';
+            lastUpdatedAt = 0;
+            return;
+        }
+        if (!snapshotChanged(snapshot)) return;
+
+        lastUpdatedAt = Number(snapshot.updatedAt) || 0;
+        lastSnapshotKey = (snapshot.items || []).map(function (i) {
+            return (i.id || '') + '|' + (i.quantity || 0);
+        }).join('__') + '__' + (snapshot.total || 0);
+
+        var hasItems = snapshot.items && snapshot.items.length > 0;
+        if (hasItems) {
             showCheckout(snapshot);
         } else {
             showAds();
@@ -122,12 +183,48 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     window.addEventListener('storage', function (event) {
-        if (event.key === 'nb_customer_display') refresh(readSnapshot());
+        if (event.key === 'nb_customer_display') {
+            refreshIfChanged();
+        }
     });
 
     window.addEventListener('focus', function () {
-        if (lastSnapshot) refresh(readSnapshot());
+        refreshIfChanged();
     });
 
-    refresh(readSnapshot());
+    pollTimer = setInterval(refreshIfChanged, pollIntervalMs);
+    showAds();
+    refreshIfChanged();
+
+    var scanChannel = null;
+    try { scanChannel = new BroadcastChannel('nb_scanner_relay'); } catch (e) { scanChannel = null; }
+    var relayBuffer = '';
+    var relayLastKeyAt = 0;
+    var relayLastCharacter = '';
+    document.addEventListener('keydown', function (e) {
+        var now = Date.now();
+        var isChar = e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey;
+        if (isChar && now - relayLastKeyAt < 100) {
+            if (!relayBuffer) relayBuffer = relayLastCharacter;
+            relayBuffer += e.key;
+            e.preventDefault();
+            relayLastKeyAt = now;
+            relayLastCharacter = e.key;
+            return;
+        }
+        if (e.key === 'Enter' && relayBuffer) {
+            e.preventDefault();
+            var code = relayBuffer;
+            relayBuffer = '';
+            relayLastKeyAt = 0;
+            relayLastCharacter = '';
+            if (document.hasFocus() && scanChannel) {
+                scanChannel.postMessage({ type: 'scan', code: code });
+            }
+            return;
+        }
+        if (now - relayLastKeyAt >= 1000) relayBuffer = '';
+        relayLastKeyAt = now;
+        if (isChar) relayLastCharacter = e.key;
+    }, true);
 });

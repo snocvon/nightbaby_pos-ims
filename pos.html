@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nightbaby | Point of Sale</title>
+    <style>
+        html { opacity: 1; visibility: visible; }
+        body { opacity: 1; }
+    </style>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/ico" href="images/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -39,7 +43,7 @@
                     </a>
                 </nav>
                 <div class="sidebar-footer">
-                    <a href="login.html" class="sidebar-link logout">
+                    <a href="index.html" class="sidebar-link logout">
                         <img class="sideNavIcon" src="sources/icons/logout-svgrepo-com.png" alt="home-icon" width="25" height="25">
                         <span>Logout</span>
                     </a>
@@ -56,6 +60,7 @@
                     </div>
                     
                     <div class="topbar-right">
+                        <button class="remit-btn" id="remitBtn" type="button">Remit</button>
                         <button class="customer-screen-btn" id="customerScreenBtn" type="button">Customer display</button>
                         <div class="topbar-datetime">
                             <span class="datetime-day" id="currentDay">Saturday</span>
@@ -128,7 +133,6 @@
                                     <button class="category-tab active" data-category="all">All</button>
                                     <button class="category-tab" data-category="clothing">Clothing</button>
                                     <button class="category-tab" data-category="perfume">Perfume</button>
-                                    <button class="category-tab" data-category="accessories">Accessories</button>
                                     <button class="category-tab" data-category="services">Services</button>
                                 </div>
                             </div>
@@ -144,15 +148,6 @@
                         </div>
                         
                         <div class="pos-right">
-                            <div class="pos-card">
-                                <div class="pos-card-header">
-                                    <h3>Shopping Cart</h3>
-                                    <span class="cart-count" id="cartCount">0 items</span>
-                                </div>
-                                <div class="pos-cart-items" id="cartItems">
-                                    <div class="empty-cart-message">No items in cart</div>
-                                </div>
-                            </div>
                             <div class="pos-card receipt-card">
                                 <div class="pos-card-header">
                                     <h3>Sales Receipt</h3>
@@ -185,9 +180,20 @@
                                     </div>
                                 </div>
 
+                                <div class="receipt-tx-type">
+                                    <span class="tx-type-label">TRANSACTION TYPE</span>
+                                    <div class="tx-type-tabs" id="txTypeTabs">
+                                        <button type="button" class="tx-type-tab active" data-txtype="Purchase">Purchase</button>
+                                        <button type="button" class="tx-type-tab" data-txtype="Consultation">Consultation</button>
+                                        <button type="button" class="tx-type-tab" data-txtype="Repair">Repair</button>
+                                        <button type="button" class="tx-type-tab" data-txtype="Bespoke">Bespoke</button>
+                                    </div>
+                                </div>
+
                                 <div class="receipt-actions">
                                     <button class="btn-complete" id="completeSaleBtn">Complete Sale</button>
                                     <button class="btn-clear" id="clearCartBtn">Clear Cart</button>
+                                    <button class="btn-refund" id="refundBtn">Process Refund</button>
                                 </div>
                             </div>
                         </div>
@@ -202,7 +208,127 @@
         </div>
     </div>
 
+    <div class="pos-modal-overlay" id="refundModalOverlay">
+        <div class="pos-modal refund-modal">
+            <div class="pos-modal-header">
+                <h2>Process Refund</h2>
+                <button class="pos-modal-close" id="refundModalClose">✕</button>
+            </div>
+            <div class="pos-modal-body">
+                <div class="modal-payment-section">
+                    <label for="refundReceiptCode">Receipt / Transaction Code</label>
+                    <input type="text" id="refundReceiptCode" placeholder="Enter receipt code e.g. POS-XXX-XXXXXXXXXX" autocomplete="off">
+                    <button type="button" id="refundLookupBtn" class="refund-lookup-btn">Lookup Transaction</button>
+
+                    <div id="refundTxInfo" class="refund-tx-info" style="display:none; margin-top:0.75rem; padding:0.75rem; background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem;"><span>Transaction:</span><strong id="refundTxIdShow">--</strong></div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem;"><span>Cashier:</span><span id="refundTxCashier">--</span></div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem;"><span>Date:</span><span id="refundTxDate">--</span></div>
+                    </div>
+
+                    <label for="refundProductSelect">Product to Refund</label>
+                    <select id="refundProductSelect" disabled>
+                        <option value="">-- Select product after lookup --</option>
+                    </select>
+
+                    <div id="refundProductInfo" class="refund-product-info" style="display:none; margin-top:0.5rem; padding:0.5rem; background:rgba(129,199,132,0.08); border-radius:6px; font-size:0.85rem;">
+                        <div>Price: <span id="refundProductPrice">--</span></div>
+                        <div>Qty in TX: <span id="refundProductTxQty">--</span></div>
+                    </div>
+
+                    <label for="refundQty">Quantity to Refund</label>
+                    <input type="number" id="refundQty" min="1" value="1" disabled>
+
+                    <label for="refundReason">Reason for Refund</label>
+                    <select id="refundReason">
+                        <option value="Defective Item">Defective Item</option>
+                        <option value="Wrong Item">Wrong Item</option>
+                        <option value="Wrong Size">Wrong Size</option>
+                        <option value="Customer Changed Mind">Customer Changed Mind</option>
+                        <option value="Damaged in Transit">Damaged in Transit</option>
+                        <option value="Other">Other</option>
+                    </select>
+
+                    <div class="refund-summary" style="margin-top:1rem; padding:0.75rem; background:var(--color-bg-elevated); border-radius:8px;">
+                        <div style="display:flex; justify-content:space-between;"><span>Refund Amount:</span><strong id="refundAmountDisplay">₱0.00</strong></div>
+                    </div>
+                </div>
+            </div>
+            <div class="pos-modal-footer">
+                <button class="modal-btn-cancel" id="refundCancelBtn">Cancel</button>
+                <button class="modal-btn-confirm" id="refundConfirmBtn" disabled>Confirm Refund</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="pos-modal-overlay" id="remitModalOverlay">
+        <div class="pos-modal remit-modal">
+            <div class="pos-modal-header">
+                <h2>Remit Cash</h2>
+                <button class="pos-modal-close" id="remitModalClose">✕</button>
+            </div>
+            <div class="pos-modal-body">
+                <div class="remit-summary">
+                    <div class="modal-summary-row"><span>Un-remitted cash sales</span><span id="remitTxCount">0</span></div>
+                    <div class="modal-summary-row"><span>Expected remittance</span><span id="remitExpected">₱0.00</span></div>
+                </div>
+                <div class="modal-payment-section">
+                    <label>Cash Transactions</label>
+                    <div style="max-height:180px; overflow:auto; border:1px solid var(--color-border); border-radius:8px;">
+                        <table style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+                            <thead><tr><th style="text-align:left; padding:0.4rem 0.5rem;">TX</th><th style="text-align:left; padding:0.4rem 0.5rem;">Date</th><th style="text-align:right; padding:0.4rem 0.5rem;">Amount</th></tr></thead>
+                            <tbody id="remitTxTbody"></tbody>
+                        </table>
+                    </div>
+                    <label for="remitAmount">Amount Remitted</label>
+                    <input type="number" id="remitAmount" placeholder="Enter cash handed to admin" min="0" step="0.01">
+                    <div class="modal-change-display">
+                        <span>Difference:</span><span id="remitDiff">—</span>
+                    </div>
+                </div>
+            </div>
+            <div class="pos-modal-footer">
+                <button class="modal-btn-cancel" id="remitCancelBtn">Cancel</button>
+                <button class="modal-btn-confirm" id="remitConfirmBtn">Confirm Remittance</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="pos-modal-overlay" id="receiptModalOverlay">
+        <div class="pos-modal receipt-modal">
+            <div class="pos-modal-header">
+                <h2>Receipt</h2>
+                <button class="pos-modal-close" id="receiptCloseBtn">✕</button>
+            </div>
+            <div class="pos-modal-body">
+                <div class="receipt-paper" id="receiptPaper">
+                    <div class="receipt-store" id="receiptStoreName">nightbaby</div>
+                    <div class="receipt-meta">
+                        <span id="receiptNo"></span>
+                        <span id="receiptDateTime"></span>
+                        <span id="receiptCashier"></span>
+                    </div>
+                    <div class="receipt-divider"></div>
+                    <div class="receipt-items" id="receiptItemsList"></div>
+                    <div class="receipt-divider"></div>
+                    <div class="receipt-totals" id="receiptTotals"></div>
+                    <div class="receipt-divider"></div>
+                    <div class="receipt-payment" id="receiptPaymentInfo"></div>
+                    <div class="receipt-thanks">Thank you for shopping!</div>
+                </div>
+            </div>
+            <div class="pos-modal-footer">
+                <div class="modal-footer-actions">
+                    <button class="modal-btn-confirm receipt-export-btn" id="receiptExportBtn">Export PDF</button>
+                    <button class="modal-btn-confirm receipt-print-btn" id="receiptPrintBtn">Print</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/global.js"></script>
+    <script src="js/vendor/jspdf.umd.min.js"></script>
     <script src="js/pos.js"></script>
+    <script src="js/access_control.js"></script>
 </body>
 </html>

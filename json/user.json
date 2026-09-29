@@ -1,18 +1,32 @@
 {
-	"users": [
-		{
-			"username": "superuser",
-			"role": "it",
-			"cashierId": "SUP-0001",
-			"salt": "nightbaby-super-2026",
-			"passwordHash": "8fc040647b39ffe7c7bcd17d2710e74e2702d208bd240b592a8834f1aa740b9c"
-		},
-		{
-			"username": "admin",
-			"role": "admin",
-			"cashierId": "ADM-0001",
-			"salt": "nightbaby-admin-2026",
-			"passwordHash": "0c65868e175e4f29ca01ac07a94b761d651ed479aaaf5ec08f772e22b879800a"
-		}
-	]
+  "users": [
+    {
+      "username": "superuser",
+      "role": "it",
+      "cashierId": "SUP-0001",
+      "salt": "nightbaby-super-2026",
+      "passwordHash": "8fc040647b39ffe7c7bcd17d2710e74e2702d208bd240b592a8834f1aa740b9c",
+      "fullName": "Super Admin",
+      "securityQuestion": "",
+      "securityAnswer": "",
+      "preferences": {
+        "theme": "dark",
+        "fontSize": "default"
+      }
+    },
+    {
+      "username": "admin",
+      "role": "admin",
+      "cashierId": "ADM-0001",
+      "salt": "nightbaby-admin-2026",
+      "passwordHash": "0c65868e175e4f29ca01ac07a94b761d651ed479aaaf5ec08f772e22b879800a",
+      "fullName": "Admin",
+      "securityQuestion": "",
+      "securityAnswer": "",
+      "preferences": {
+        "theme": "dark",
+        "fontSize": "default"
+      }
+    }
+  ]
 }

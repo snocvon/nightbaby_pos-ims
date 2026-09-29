@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nightbaby | System Management</title>
+    <style>
+        html { opacity: 1; visibility: visible; }
+        body { opacity: 1; }
+    </style>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/ico" href="images/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -20,7 +24,7 @@
                 <div class="sidebar-user">
                     <button class="user-role-btn" id="userRoleBtn">
                         <img class="sideNavIcon" src="sources/icons/user-svgrepo-com(1).png" alt="home-icon" width="20" height="20">
-                        <span>SuperUser</span>
+                        <span>Super Admin</span>
                     </button>
                 </div>
 
@@ -35,7 +39,7 @@
                     </a>
                 </nav>
                 <div class="sidebar-footer">
-                    <a href="login.html" class="sidebar-link logout">
+                    <a href="index.html" class="sidebar-link logout">
                         <img class="sideNavIcon" src="sources/icons/logout-svgrepo-com.png" alt="home-icon" width="25" height="25">
                         <span>Logout</span>
                     </a>
@@ -67,8 +71,11 @@
                     <section class="dashboard-card system-controls-card">
                         <div class="section-header panel-header maintenance-header"><div><span class="section-kicker">System Controls</span><h2>Maintenance</h2></div></div>
                         <div class="system-control-list">
-                            <button type="button" class="system-control-btn" id="backupSystemBtn"><span><strong>Backup System</strong><small>Download products, users, settings, and transactions as a text file.</small></span><span>Download TXT</span></button>
-                            <button type="button" class="system-control-btn danger" id="resetSystemDataBtn"><span><strong>System Reset</strong><small>Restore application data to its original defaults.</small></span><span>Reset Data</span></button>
+                            <button type="button" class="system-control-btn" id="backupSystemBtn"><span><strong>Backup System</strong><small>Download all data as a .NBData backup file.</small></span><span>Download .NBData</span></button>
+                            <button type="button" class="system-control-btn" id="importSystemBtn"><span><strong>Import Data</strong><small>Restore from a .NBData backup file.</small></span><span>Import .NBData</span></button>
+                            <input type="file" id="importSystemFile" accept=".NBData,.nbdata,application/octet-stream" hidden>
+                            <button type="button" class="system-control-btn danger" id="resetSystemDataBtn"><span><strong>System Reset</strong><small>Products, sales, chart to 0. Tick "Reset Users" to also restore accounts to default.</small></span><span>Reset Data</span></button>
+                            <label class="system-toggle"><span><strong>Reset Users to Default</strong><small>Also reset all accounts back to the 2 defaults (superadmin + admin).</small></span><input type="checkbox" id="resetIncludeUsersToggle"><span class="toggle-slider"></span></label>
                             <label class="system-toggle"><span><strong>System Down</strong><small>Block Admin and Cashier access for maintenance.</small></span><input type="checkbox" id="systemDownToggle"><span class="toggle-slider"></span></label>
                         </div>
                     </section>
@@ -83,5 +90,6 @@
 
     <script src="js/global.js"></script>
     <script src="js/system_management.js"></script>
+    <script src="js/access_control.js"></script>
 </body>
 </html>

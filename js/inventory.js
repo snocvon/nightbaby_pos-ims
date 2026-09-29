@@ -15,11 +15,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function generateSku(p) {
-        if (p.sku) return p.sku;
-        var cat = (p.category || 'X').toString().toUpperCase().slice(0, 3);
-        var idNum = Number(p.id) || 0;
-        var padded = String(idNum).padStart(4, '0');
-        return 'NB-' + cat + '-' + padded;
+        if (p && p.sku) return p.sku;
+        var cat = (p && p.category || 'X').toString().toUpperCase().slice(0, 3);
+        var rawId = String(p && p.id || '0000');
+        var shortId = '';
+        if (/^\d+$/.test(rawId)) {
+            shortId = String(Number(rawId)).padStart(4, '0');
+        } else {
+            for (var i = rawId.length - 4; i < rawId.length; i++) {
+                var ch = rawId.charCodeAt(i >= 0 ? i : 0);
+                shortId += String((ch % 10));
+            }
+            while (shortId.length < 4) shortId = '0' + shortId;
+        }
+        return 'NB-' + cat + '-' + shortId.slice(-4);
     }
 
 
@@ -294,9 +303,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!ov) return;
         if (!ov.__boundClose) {
             ov.__boundClose = true;
-            ov.addEventListener('click', function (e) {
-                if (e.target === ov) closeModal(overlayId);
-            });
             for (var i = 0; i < closeBtnIds.length; i++) {
                 var btn = document.getElementById(closeBtnIds[i]);
                 if (btn) btn.addEventListener('click', function () { closeModal(overlayId); });
@@ -351,21 +357,41 @@ document.addEventListener('DOMContentLoaded', function () {
         if (stock) stock.textContent = getEffectiveStock(product);
         renderBarcode(product, document.getElementById('barcodeCanvas'));
         var printBtn = document.getElementById('printSingleBarcodeBtn');
-        if (printBtn) printBtn.onclick = function () { printBarcodes([product]); };
+        var qtyInput = document.getElementById('barcodePrintQty');
+        function getPrintCopies() {
+            var copies = Math.floor(Number(qtyInput && qtyInput.value) || 1);
+            if (!isFinite(copies) || copies < 1) copies = 1;
+            if (copies > 500) copies = 500;
+            return copies;
+        }
+        if (printBtn) {
+            printBtn.onclick = function () { printBarcodes([product], getPrintCopies()); };
+        }
+        if (qtyInput && printBtn) {
+            qtyInput.oninput = function () {
+                printBtn.textContent = 'Print Barcode × ' + getPrintCopies();
+            };
+            qtyInput.oninput();
+        }
         openModal('barcodeModalOverlay');
     }
 
-    function printBarcodes(products) {
+    function printBarcodes(products, copies) {
         var container = document.getElementById('printBarcodesContainer');
         if (!container || typeof JsBarcode !== 'function' || !products.length) return;
+        var repeat = Math.floor(Number(copies) || 1);
+        if (!isFinite(repeat) || repeat < 1) repeat = 1;
+        if (repeat > 500) repeat = 500;
         container.innerHTML = '<div class="print-area"><h1>nightbaby Inventory Barcodes</h1><div class="print-barcode-grid"></div></div>';
         var grid = container.querySelector('.print-barcode-grid');
         products.forEach(function (product) {
-            var label = document.createElement('div');
-            label.className = 'print-barcode-label';
-            label.innerHTML = '<strong>' + escapeHtml(product.name || 'Product') + '</strong><svg></svg><span>' + escapeHtml(barcodeValue(product)) + '</span>';
-            grid.appendChild(label);
-            renderBarcode(product, label.querySelector('svg'));
+            for (var copy = 0; copy < repeat; copy++) {
+                var label = document.createElement('div');
+                label.className = 'print-barcode-label';
+                label.innerHTML = '<strong>' + escapeHtml(product.name || 'Product') + '</strong><svg></svg><span>' + escapeHtml(barcodeValue(product)) + '</span>';
+                grid.appendChild(label);
+                renderBarcode(product, label.querySelector('svg'));
+            }
         });
         window.print();
     }
@@ -502,6 +528,73 @@ document.addEventListener('DOMContentLoaded', function () {
         openModal('productModalOverlay');
     }
 
+    var addProductImageData = '';
+    var editProductImageData = '';
+
+    function setupImagePreview(previewEl, fileInputEl, dataHolder) {
+        if (!previewEl || !fileInputEl) return;
+        function clearPreview() {
+            previewEl.innerHTML = '<span class="image-placeholder-text">No image</span>';
+        }
+        fileInputEl.addEventListener('change', function () {
+            var file = this.files && this.files[0];
+            if (!file) return;
+            if (!file.type || file.type.indexOf('image/') !== 0) {
+                if (typeof showNotification === 'function') showNotification('Please select an image file', 'error');
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var dataUrl = e.target && e.target.result ? String(e.target.result) : '';
+                previewEl.innerHTML = '<img src="' + dataUrl + '" alt="Preview" style="width:100%;height:100%;object-fit:cover;">';
+
+                function storeValue(val) {
+                    if (dataHolder === 'add') addProductImageData = val;
+                    else if (dataHolder === 'edit') editProductImageData = val;
+                }
+
+                var relPath = 'images/PRODUCTS/' + file.name;
+                if (window.showSaveFilePicker) {
+                    saveImageFileToProject(file, function (saved) {
+                        storeValue(relPath);
+                        if (saved && typeof showNotification === 'function') {
+                            showNotification('Image saved to ' + relPath, 'success');
+                        }
+                    });
+                } else {
+                    storeValue(relPath);
+                }
+            };
+            reader.onerror = function () {
+                if (typeof showNotification === 'function') showNotification('Failed to read image', 'error');
+                clearPreview();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function saveImageFileToProject(file, callback) {
+        try {
+            window.showSaveFilePicker({
+                suggestedName: file.name,
+                types: [{ description: 'Image', accept: { 'image/*': ['.' + (file.name.split('.').pop() || 'jpg')] } }],
+                startIn: 'pictures'
+            }).then(function (handle) {
+                return handle.createWritable().then(function (writable) {
+                    return writable.write(file).then(function () {
+                        return writable.close();
+                    });
+                }).then(function () {
+                    callback(true);
+                });
+            }).catch(function () {
+                callback(false);
+            });
+        } catch (err) {
+            callback(false);
+        }
+    }
+
     var addProductBtn = document.querySelector('.add-product-btn');
     if (addProductBtn) {
         addProductBtn.addEventListener('click', function () { openAddModal(); });
@@ -509,7 +602,22 @@ document.addEventListener('DOMContentLoaded', function () {
     function openAddModal() {
         var f = document.getElementById('addProductForm');
         if (f) f.reset();
+        addProductImageData = '';
+        var prev = document.getElementById('addProductImagePreview');
+        if (prev) prev.innerHTML = '<span class="image-placeholder-text">No image</span>';
         openModal('addProductModalOverlay');
+    }
+
+    var addImgFile = document.getElementById('addProductImage');
+    var addImgPrev = document.getElementById('addProductImagePreview');
+    setupImagePreview(addImgPrev, addImgFile, 'add');
+    if (addImgPrev && addImgFile) {
+        addImgPrev.addEventListener('click', function (e) {
+            if (e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                addImgFile.click();
+            }
+        });
     }
 
     var addSaveBtn = document.getElementById('addProductSaveBtn');
@@ -521,7 +629,6 @@ document.addEventListener('DOMContentLoaded', function () {
             var catEl = document.getElementById('addProductCategory');
             var subcatEl = document.getElementById('addProductSubcategory');
             var sizeEl = document.getElementById('addProductSize');
-            var skuEl = document.getElementById('addProductSku');
             var alertEl = document.getElementById('addProductLowStock');
             var discountEl = document.getElementById('addProductDiscount');
             var expEl = document.getElementById('addProductExpiration');
@@ -561,10 +668,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 discount: discount,
                 stock: stock,
                 size: sizeEl ? sizeEl.value : 'N/A',
-                sku: skuEl ? skuEl.value.trim() : '',
                 lowStockAlert: alertEl ? Number(alertEl.value) || 10 : 10,
                 expiration: expEl ? expEl.value : '',
-                image: '',
+                image: addProductImageData || '',
                 dateAdded: typeof getCurrentDateTime === 'function' ? getCurrentDateTime() : new Date().toLocaleString(),
                 updated: typeof getCurrentDateTime === 'function' ? getCurrentDateTime() : new Date().toLocaleString()
             };
@@ -573,9 +679,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 addProduct(newProduct);
             } else {
                 var list = allProducts();
-                var newId = 1;
-                for (var xi = 0; xi < list.length; xi++) newId = Math.max(newId, Number(list[xi].id) + 1);
-                newProduct.id = newId;
+                if (typeof generateAlphanumericId === 'function') {
+                    var nid;
+                    do { nid = generateAlphanumericId(6); } while (list.some(function (p) { return String(p.id) === nid; }));
+                    newProduct.id = nid;
+                } else {
+                    var newId = 1;
+                    for (var xi = 0; xi < list.length; xi++) newId = Math.max(newId, Number(list[xi].id) + 1);
+                    newProduct.id = newId;
+                }
                 list.push(newProduct);
                 if (typeof saveProducts === 'function') saveProducts(list);
             }
@@ -588,6 +700,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     var currentEditId = null;
+    var editImgFile = document.getElementById('editProductImage');
+    var editImgPrev = document.getElementById('editProductImagePreview');
+    setupImagePreview(editImgPrev, editImgFile, 'edit');
+    if (editImgPrev && editImgFile) {
+        editImgPrev.addEventListener('click', function (e) {
+            if (e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                editImgFile.click();
+            }
+        });
+    }
+
     function openEditModal(p) {
         currentEditId = p.id;
         var nameEl = document.getElementById('editProductName');
@@ -599,6 +723,13 @@ document.addEventListener('DOMContentLoaded', function () {
         var sizeEl = document.getElementById('editProductSize');
         var stockEl = document.getElementById('editProductStock');
         var expEl = document.getElementById('editProductExpiration');
+
+        editProductImageData = p.image || '';
+        if (editImgPrev) {
+            editImgPrev.innerHTML = editProductImageData
+                ? '<img src="' + editProductImageData + '" alt="Preview" style="width:100%;height:100%;object-fit:cover;">'
+                : '<span class="image-placeholder-text">No image</span>';
+        }
 
         if (nameEl) nameEl.value = p.name || '';
         if (skuEl) skuEl.value = generateSku(p);
@@ -691,6 +822,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 expiration: expEl ? expEl.value : '',
                 updated: typeof getCurrentDateTime === 'function' ? getCurrentDateTime() : new Date().toLocaleString()
             };
+            if (editProductImageData) fields.image = editProductImageData;
 
             if (typeof updateProduct === 'function') {
                 updateProduct(currentEditId, fields);
@@ -753,35 +885,211 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     var currentAdjustId = null;
+    var currentAdjustPendingKey = null;
+
+    function getRefundStockDoneKeys() {
+        try {
+            var raw = localStorage.getItem('nb_refund_stock_done');
+            if (!raw) return {};
+            var obj = JSON.parse(raw);
+            return obj && typeof obj === 'object' ? obj : {};
+        } catch (e) {
+            return {};
+        }
+    }
+    function saveRefundStockDoneKeys(keys) {
+        try { localStorage.setItem('nb_refund_stock_done', JSON.stringify(keys || {})); } catch (e) { }
+    }
+    function refundItemKey(r) {
+        return String(r.txId || '') + '::' + String(r.productId || '') + '::' + String(r.refundedAt || 0);
+    }
+    function getPendingRefundedItems() {
+        var all = typeof getRefundedItems === 'function' ? getRefundedItems() : [];
+        var done = getRefundStockDoneKeys();
+        var pending = [];
+        for (var i = 0; i < all.length; i++) {
+            var r = all[i];
+            if (!done[refundItemKey(r)]) pending.push(r);
+        }
+        pending.sort(function (a, b) { return (b.refundedAt || 0) - (a.refundedAt || 0); });
+        return pending;
+    }
+    function markRefundStockDone(r) {
+        var done = getRefundStockDoneKeys();
+        done[refundItemKey(r)] = Date.now();
+        saveRefundStockDoneKeys(done);
+    }
+
+    function updateAdjustStockButtonState() {
+        var btn = document.querySelector('.adjust-stock-btn');
+        var badge = document.querySelector('.adjust-stock-badge');
+        var pending = getPendingRefundedItems();
+        var count = pending.length;
+        if (btn) {
+            if (count > 0) {
+                btn.disabled = false;
+                btn.classList.remove('is-disabled');
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.disabled = true;
+                btn.classList.add('is-disabled');
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
+        if (badge) {
+            if (count > 0) {
+                badge.style.display = 'inline-block';
+                badge.textContent = String(count > 99 ? '99+' : count);
+            } else {
+                badge.style.display = 'none';
+                badge.textContent = '0';
+            }
+        }
+    }
+
     var adjustBtn = document.querySelector('.adjust-stock-btn');
     if (adjustBtn) {
         adjustBtn.addEventListener('click', function () {
-            var firstRow = document.querySelector('.inventory-table tbody tr');
-            if (!firstRow) {
-                if (typeof showNotification === 'function') showNotification('No products to adjust', 'error');
+            var pending = getPendingRefundedItems();
+            if (!pending.length) {
+                if (typeof showNotification === 'function') showNotification('No refunded items to process', 'info');
                 return;
             }
-            var id = firstRow.getAttribute('data-product-id');
-            var p = getProductByIdSafe(id);
-            if (p) openAdjustModal(p);
+            openAdjustModal();
         });
     }
 
-    function openAdjustModal(p) {
-        currentAdjustId = p.id;
-        var nameEl = document.getElementById('adjustStockProductName');
-        if (nameEl) nameEl.value = p.name || '';
+    function renderPendingAdjustList(selectedKey) {
+        var container = document.getElementById('adjustPendingList');
+        if (!container) return;
+        var pending = getPendingRefundedItems();
+        if (!pending.length) {
+            container.innerHTML = '<div style="text-align:center; padding:1rem; color:var(--color-text-tertiary); font-size:0.85rem;">No refunded items to process</div>';
+            return;
+        }
+        var html = '';
+        for (var ri = 0; ri < pending.length; ri++) {
+            var r = pending[ri];
+            var key = refundItemKey(r);
+            var p = getProductByIdSafe(r.productId);
+            var curStock = p ? getEffectiveStock(p) : 0;
+            var stockBadge = getStatusBadge(curStock);
+            var isSelected = selectedKey && key === selectedKey;
+            var selBg = isSelected ? 'background:rgba(244,162,97,0.1); outline:2px solid var(--color-accent, #f4a261);' : 'background:transparent;';
+            html += '<div class="adjust-pending-row" data-key="' + escapeHtml(key) + '" data-product-id="' + escapeHtml(String(r.productId || '')) + '" data-pending-index="' + ri + '" data-selected="' + (isSelected ? '1' : '0') + '" style="padding:0.5rem 0.6rem; border-bottom:1px solid var(--color-border); font-size:0.82rem; display:flex; flex-direction:column; gap:4px; cursor:pointer; border-radius:6px; margin:2px 0; transition:background 0.15s, outline 0.15s;' + selBg + '">' +
+                '<div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">' +
+                '<strong style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + escapeHtml(r.productName) + '</strong>' +
+                stockBadge +
+                '</div>' +
+                '<div style="display:flex; justify-content:space-between; color:var(--color-text-secondary); flex-wrap:wrap; gap:4px;">' +
+                '<span>Qty: ' + (r.quantity || 1) + ' | Reason: ' + escapeHtml(r.refundReason || 'N/A') + '</span>' +
+                '<span style="margin-left:0.5rem; flex-shrink:0;">TX: ' + escapeHtml(String(r.txId).slice(-8)) + '</span>' +
+                '</div>' +
+                '</div>';
+        }
+        container.innerHTML = html;
+        var rows = container.querySelectorAll('.adjust-pending-row');
+        for (var rj = 0; rj < rows.length; rj++) {
+            (function (row) {
+                row.addEventListener('mouseenter', function () {
+                    if (row.getAttribute('data-selected') !== '1') {
+                        row.style.background = 'rgba(244,162,97,0.08)';
+                    }
+                });
+                row.addEventListener('mouseleave', function () {
+                    if (row.getAttribute('data-selected') === '1') {
+                        row.style.background = 'rgba(244,162,97,0.1)';
+                    } else {
+                        row.style.background = 'transparent';
+                    }
+                });
+                row.addEventListener('click', function () {
+                    var key = row.getAttribute('data-key');
+                    var pid = row.getAttribute('data-product-id');
+                    selectPendingAdjustRow(key, pid);
+                });
+            })(rows[rj]);
+        }
+    }
+
+    function selectPendingAdjustRow(key, productId) {
+        currentAdjustPendingKey = key || null;
+        currentAdjustId = productId || null;
+        var selectedEl = document.getElementById('adjustSelectedProduct');
+        var stockEl = document.getElementById('adjustStockCurrentStock');
+        var statusEl = document.getElementById('adjustStockCurrentStatus');
+        if (!currentAdjustId) {
+            if (selectedEl) selectedEl.value = '-- Select from list --';
+            if (stockEl) stockEl.value = '--';
+            if (statusEl) statusEl.textContent = '--';
+            return;
+        }
+        var p = getProductByIdSafe(currentAdjustId);
+        if (!p) {
+            if (selectedEl) selectedEl.value = 'Product not found in inventory';
+            if (stockEl) stockEl.value = '--';
+            if (statusEl) statusEl.textContent = '--';
+            return;
+        }
+        var stock = getEffectiveStock(p);
+        if (selectedEl) selectedEl.value = (p.name || '') + ' (SKU: ' + generateSku(p) + ')';
+        if (stockEl) stockEl.value = String(stock);
+        if (statusEl) {
+            statusEl.innerHTML = getStatusBadge(stock);
+            statusEl.style.background = 'transparent';
+            statusEl.style.padding = '0';
+        }
+        var qtyEl = document.getElementById('adjustStockQuantity');
+        if (qtyEl && !qtyEl.value) {
+            var pendingList = getPendingRefundedItems();
+            for (var i = 0; i < pendingList.length; i++) {
+                if (refundItemKey(pendingList[i]) === key) {
+                    qtyEl.value = String(pendingList[i].quantity || 1);
+                    break;
+                }
+            }
+        }
+        renderPendingAdjustList(key);
+    }
+
+    function openAdjustModal() {
+        currentAdjustId = null;
+        currentAdjustPendingKey = null;
+        var selectedEl = document.getElementById('adjustSelectedProduct');
+        if (selectedEl) selectedEl.value = '-- Select from list --';
+        var stockEl = document.getElementById('adjustStockCurrentStock');
+        if (stockEl) stockEl.value = '--';
+        var statusEl = document.getElementById('adjustStockCurrentStatus');
+        if (statusEl) statusEl.textContent = '--';
         var typeEl = document.getElementById('adjustStockType');
         if (typeEl) typeEl.value = '+';
         var qtyEl = document.getElementById('adjustStockQuantity');
         if (qtyEl) qtyEl.value = '';
+        var reasonEl = document.getElementById('adjustStockReason');
+        if (reasonEl) reasonEl.value = 'Customer Return';
+        var notesEl = document.getElementById('adjustStockNotes');
+        if (notesEl) notesEl.value = '';
+        setTimeout(function () {
+            renderPendingAdjustList(null);
+        }, 50);
         openModal('adjustStockModalOverlay');
     }
+
+    var refreshRefundedBtn = document.getElementById('refreshRefundedBtn');
+    if (refreshRefundedBtn) refreshRefundedBtn.addEventListener('click', function () {
+        updateAdjustStockButtonState();
+        renderPendingAdjustList(currentAdjustPendingKey);
+    });
 
     var adjustSaveBtn = document.getElementById('adjustStockSaveBtn');
     if (adjustSaveBtn) {
         adjustSaveBtn.addEventListener('click', function () {
-            if (currentAdjustId == null) return;
+            if (currentAdjustId == null || !currentAdjustPendingKey) {
+                if (typeof showNotification === 'function') showNotification('Please select a refunded item from the list', 'error');
+                return;
+            }
             var typeEl = document.getElementById('adjustStockType');
             var qtyEl = document.getElementById('adjustStockQuantity');
             var op = typeEl ? typeEl.value : '+';
@@ -793,7 +1101,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             var p = getProductByIdSafe(currentAdjustId);
-            if (!p) return;
+            if (!p) {
+                if (typeof showNotification === 'function') showNotification('Product not found in inventory', 'error');
+                return;
+            }
             var cur = Number(p.stock) || 0;
             var newStock = op === '+' ? cur + qty : cur - qty;
             if (newStock < 0) newStock = 0;
@@ -814,15 +1125,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (typeof saveProducts === 'function') saveProducts(list);
             }
 
+            var pending = getPendingRefundedItems();
+            for (var pi = 0; pi < pending.length; pi++) {
+                if (refundItemKey(pending[pi]) === currentAdjustPendingKey) {
+                    markRefundStockDone(pending[pi]);
+                    break;
+                }
+            }
+
             if (typeof showNotification === 'function') {
                 var word = op === '+' ? 'added to' : 'removed from';
                 showNotification('Stock ' + word + ' "' + p.name + '" successfully!', 'success');
             }
-            closeModal('adjustStockModalOverlay');
-            currentAdjustId = null;
+
             filterAndRender();
+            updateAdjustStockButtonState();
+
+            var remaining = getPendingRefundedItems();
+            if (!remaining.length) {
+                closeModal('adjustStockModalOverlay');
+                currentAdjustId = null;
+                currentAdjustPendingKey = null;
+            } else {
+                currentAdjustId = null;
+                currentAdjustPendingKey = null;
+                var selEl = document.getElementById('adjustSelectedProduct');
+                if (selEl) selEl.value = '-- Select from list --';
+                var sEl = document.getElementById('adjustStockCurrentStock');
+                if (sEl) sEl.value = '--';
+                var stEl = document.getElementById('adjustStockCurrentStatus');
+                if (stEl) stEl.textContent = '--';
+                if (qtyEl) qtyEl.value = '';
+                if (notesEl) notesEl.value = '';
+                renderPendingAdjustList(null);
+            }
         });
     }
+
+    updateAdjustStockButtonState();
 
     var searchInput = document.querySelector('.inventory-search-filters .search-input');
     if (searchInput) searchInput.addEventListener('input', filterAndRender);

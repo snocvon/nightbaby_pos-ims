@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>nightbaby | Login</title>
     <link rel="icon" type="image/ico" href="images/favicon.ico">
+    <style>
+        html { opacity: 1; visibility: visible; }
+        body { opacity: 1; }
+    </style>
     <link rel="stylesheet" href="css/style.css">
 
 <body>
@@ -36,7 +40,21 @@
                     <input type="text" id="username" name="username" placeholder="Enter your username" value="">
 
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password" value="">
+                    <div class="password-field">
+                        <input type="password" id="password" name="password" placeholder="Enter your password" value="">
+                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password" aria-pressed="false" title="Show password">
+                            <svg class="password-eye password-eye-open" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M1.8 12S5.2 5.6 12 5.6 22.2 12 22.2 12 18.8 18.4 12 18.4 1.8 12 1.8 12Z"></path>
+                                <circle cx="12" cy="12" r="3.2"></circle>
+                            </svg>
+                            <svg class="password-eye password-eye-hidden" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M1.8 12S5.2 5.6 12 5.6c1.5 0 2.8.4 3.9.9"></path>
+                                <path d="M22.2 12S18.8 18.4 12 18.4c-1.6 0-3-.4-4.1-1"></path>
+                                <path d="M3 3l18 18"></path>
+                                <path d="M10 10a3.2 3.2 0 0 0 4 4"></path>
+                            </svg>
+                        </button>
+                    </div>
 
                     <div class="form-options">
                         <a href="#" id="forgotPasswordLink">Forgot Password?</a>
@@ -55,18 +73,20 @@
                 <button type="button" class="pos-modal-close" id="closeForgotPassword">&times;</button>
             </div>
             <form id="forgotPasswordForm" class="account-form" autocomplete="off">
-                <p class="forgot-password-help">Verify your account details to create a new password.</p>
+                <p class="forgot-password-help">Verify your identity to reset your password.</p>
                 <div class="form-group"><label for="resetUsername">Username</label><input id="resetUsername" type="text" required autocomplete="username"></div>
-                <div class="form-group"><label for="resetAccountHolderName">Account Holder Name</label><input id="resetAccountHolderName" type="text" required autocomplete="name"></div>
-                <div class="form-group"><label for="resetNewPassword">New Password</label><input id="resetNewPassword" type="password" required minlength="6" autocomplete="new-password"></div>
-                <div class="form-group"><label for="resetConfirmPassword">Confirm New Password</label><input id="resetConfirmPassword" type="password" required minlength="6" autocomplete="new-password"></div>
+                <div class="form-group"><label for="resetSecurityQuestion">Security Question</label><select id="resetSecurityQuestion" required><option value="">Select your security question</option><option value="pet">What was the name of your first pet?</option><option value="school">What was the name of your first school?</option><option value="city">In what city were you born?</option></select></div>
+                <div class="form-group"><label for="resetSecurityAnswer">Security Answer</label><input id="resetSecurityAnswer" type="text" required autocomplete="off"></div>
+                <div class="form-group"><label for="resetNewPassword">New Password</label><input id="resetNewPassword" type="password" required minlength="8" autocomplete="new-password"></div>
+                <div class="form-group"><label for="resetConfirmPassword">Confirm New Password</label><input id="resetConfirmPassword" type="password" required minlength="8" autocomplete="new-password"></div>
                 <p class="account-form-error" id="forgotPasswordError" role="alert"></p>
                 <div class="account-modal-footer"><button type="button" class="modal-btn-cancel" id="cancelForgotPassword">Cancel</button><button type="submit" class="modal-btn-confirm">Reset Password</button></div>
             </form>
         </section>
     </div>
     <script src="js/global.js"></script>
-    <script src="js/login.js?v=3"></script>
+    <script src="js/access_control.js"></script>
+    <script src="js/login.js"></script>
 </body>
 
 </html>
