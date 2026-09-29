@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nightbaby | Login</title>
+    <link rel="icon" type="image/ico" href="images/favicon.ico">
+    <link rel="stylesheet" href="css/style.css">
+
+<body>
+    <div class="login-page">
+        <section class="login-left">
+
+            <div class="left-content">
+                <div class="logo-container">
+                    <img src="images/logo.png" alt="nightbaby logo" class="logo-image">
+                </div>
+
+                <div class="tagline">NIGHTBABY POINT-OF-SALE AND <br>INVENTORY MANAGEMENT SYSTEM</div>
+
+                <div class="footnote">
+                    <span>2026 nightbaby</span>
+                    <span>All Rights Reserved v1.2.0</span>
+                    <span>·</span>
+                    <span>Powered by nightbaby</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="login-right" id="loginRight">
+            <div class="glass-form" id="loginForm">
+                <div class="form-title">USER LOGIN</div>
+                <form class="login-form" id="loginFormElement" action="home.html" method="get">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" value="">
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" value="">
+
+                    <div class="form-options">
+                        <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" id="loginButton">LOGIN</button>
+                </form>
+            </div>
+        </section>
+
+    </div>
+    <div class="account-modal-overlay" id="forgotPasswordModal" hidden>
+        <section class="account-modal forgot-password-modal" role="dialog" aria-modal="true" aria-labelledby="forgotPasswordTitle">
+            <div class="account-modal-header">
+                <h2 id="forgotPasswordTitle">Reset Password</h2>
+                <button type="button" class="pos-modal-close" id="closeForgotPassword">&times;</button>
+            </div>
+            <form id="forgotPasswordForm" class="account-form" autocomplete="off">
+                <p class="forgot-password-help">Verify your account details to create a new password.</p>
+                <div class="form-group"><label for="resetUsername">Username</label><input id="resetUsername" type="text" required autocomplete="username"></div>
+                <div class="form-group"><label for="resetAccountHolderName">Account Holder Name</label><input id="resetAccountHolderName" type="text" required autocomplete="name"></div>
+                <div class="form-group"><label for="resetNewPassword">New Password</label><input id="resetNewPassword" type="password" required minlength="6" autocomplete="new-password"></div>
+                <div class="form-group"><label for="resetConfirmPassword">Confirm New Password</label><input id="resetConfirmPassword" type="password" required minlength="6" autocomplete="new-password"></div>
+                <p class="account-form-error" id="forgotPasswordError" role="alert"></p>
+                <div class="account-modal-footer"><button type="button" class="modal-btn-cancel" id="cancelForgotPassword">Cancel</button><button type="submit" class="modal-btn-confirm">Reset Password</button></div>
+            </form>
+        </section>
+    </div>
+    <script src="js/global.js"></script>
+    <script src="js/login.js?v=3"></script>
+</body>
+
+</html>

@@ -1,0 +1,305 @@
+<!-- for fix pa ito mga hardcoded pa -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nightbaby | Dashboard</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" type="image/ico" href="images/favicon.ico" />
+</head>
+<body>
+    <div class="dashboard-page">
+        <div class="dashboard-container">
+            <aside class="dashboard-sidebar"> <!-- sidebar -->
+                <div class="sidebar-logo">
+                    <img src="images/logo.png" alt="nightbaby" class="sidebar-logo-img">
+                </div>
+
+                <div class="sidebar-user">
+                    <button class="user-role-btn" id="userRoleBtn">
+                        <img class="sideNavIcon" src="sources/icons/user-svgrepo-com(1).png" alt="home-icon" width="20" height="20">
+                        <span>Admin</span>
+                    </button>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="sidebar-link active" data-page="dashboard">
+                        <img class="sideNavIcon" src="sources/icons/home-svgrepo-com.png" alt="home-icon" width="25" height="25">
+                        <span>Dashboard</span>
+                    </a>
+
+                    <a href="transaction.html" class="sidebar-link" data-page="transaction">
+                        <img class="sideNavIcon" src="sources/icons/archive-svgrepo-com.png" alt="home-icon" width="25" height="25">
+                        <span>Transactions</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <a href="login.html" class="sidebar-link logout">
+                        <img class="sideNavIcon" src="sources/icons/logout-svgrepo-com.png" alt="home-icon" width="25" height="25">
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </aside>
+
+            <main class="dashboard-main">
+                <div class="dashboard-topbar">
+                    <div class="topbar-left">
+                        <div class="page-header">
+                            <img src="sources/icons/home-svgrepo-com (1).png" alt="pos-mainlogo" width="35" height="35">
+                            <h1 class="page-title" id="pageTitle">Dashboard</h1>
+                        </div>
+                    </div>
+                    <div class="topbar-right">
+                        <div class="topbar-datetime">
+                            <span class="datetime-day" id="currentDay">Saturday</span>
+                            <span class="datetime-date" id="currentDate">August 1, 2026</span>
+                            <span class="datetime-time" id="currentTime">3:45 PM</span>
+                        </div>
+                        <span class="admin-name" id="topbarAdminName">Admin</span>
+                        <div class="admin-avatar">
+                            <img src="sources/icons/user-svgrepo-com.png" alt="user-mainlogo" width="20" height="20">
+                        </div>
+                    </div>
+                </div>
+<!-- kailangan ausin heigth -->
+                <div class="dashboard-top-row">
+                    <div class="dashboard-col-left"> <!-- leftstats -->
+                        <div class="dashboard-card stat-card">
+                            <div class="stat-card-icon sales-icon">
+                                <img src="sources/icons/reciept-svgrepo-com.png" alt="" srcset="" width="25" height="25">
+                            </div>
+
+                            <div class="stat-card-content">
+                                <span class="stat-card-label">Total Sales</span>
+                                <span class="stat-card-value">₱45,280</span>
+                                <span class="stat-card-change positive">+12.5%</span>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card stat-card">
+                            <div class="stat-card-icon orders-icon">
+                                <img src="sources/icons/check-circle-svgrepo-com.png" alt="" srcset="" width="25" height="25">
+                            </div>
+                            <div class="stat-card-content">
+                                <span class="stat-card-label">Total Orders</span>
+                                <span class="stat-card-value">284</span>
+                                <span class="stat-card-change positive">+8.3%</span>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card stat-card">
+                            <div class="stat-card-icon stock-icon">
+                                <img src="sources/icons/box-svgrepo-com.png" alt="" srcset="" width="25" height="25">
+                            </div>
+                            <div class="stat-card-content">
+                                <span class="stat-card-label">Low Stock Items</span>
+                                <span class="stat-card-value">12</span>
+                                <span class="stat-card-change negative">+3 this week</span>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-card stat-card">
+                            <div class="stat-card-icon revenue-icon">
+                                <img src="sources/icons/clock-svgrepo-com.png" alt="" srcset="" width="25" height="25">
+                            </div>
+                            <div class="stat-card-content">
+                                <span class="stat-card-label">Revenue</span>
+                                <span class="stat-card-value">₱12,800</span>
+                                <span class="stat-card-change positive">+22.1%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-col-right-top"> <!-- rightstats -->
+                        <div class="dashboard-card top-products">
+                            <div class="card-header">
+                                <h3>TOP SELLING PRODUCTS</h3>
+                            </div>
+                            <div class="product-list" id="topSellingProducts"></div>
+                        </div>
+                    </div>
+                </div>
+<!-- dito muna dapt naka wide -->
+                <div class="dashboard-bottom-row">
+                    <div class="dashboard-card graph-card">
+                        <div class="card-header">
+                            <h3>Revenue Overview</h3>
+                            <span>
+                                <select id="chartFilter">
+                                    <option value="7days">Last 7 Days</option>
+                                    <option value="month">This Month</option>
+                                    <option value="year">This Year</option>
+                                </select>
+                            </span>
+                        </div>
+
+                        <div class="graph-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+<!-- dapat nasa baba to -->
+                <div class="dashboard-bottom-grid">
+<!-- mga hardcoded pa -->
+                    <!-- ===== LEFT COLUMN: Low Stock Alert + Perfume Expire Alert ===== -->
+                    <div class="dashboard-left-column">
+
+                        <!-- Low Stock Alert -->
+                        <div class="dashboard-card alert-card">
+                            <div class="card-header">
+                                <h3>Low Stock Alert</h3>
+                            </div>
+                            <div class="alert-table-wrapper">
+                                <table class="alert-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Size</th>
+                                            <th>Stock</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Mini Skirt</td>
+                                            <td>XL</td>
+                                            <td>5</td>
+                                            <td><span class="status-badge status-low">Low</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Moon Tee</td>
+                                            <td>150ml</td>
+                                            <td>0</td>
+                                            <td><span class="status-badge status-out">Out</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Perfume Expire Alert -->
+                        <div class="dashboard-card expire-card">
+                            <div class="card-header">
+                                <h3>Perfume Expire Alert</h3>
+                            </div>
+                            <div class="alert-table-wrapper">
+                                <table class="alert-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Size</th>
+                                            <th>Ex. Date</th>
+                                            <th>Days Left</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Raven Noir</td>
+                                            <td>200ml</td>
+                                            <td>2026-08-15</td>
+                                            <td>13</td>
+                                            <td><span class="status-badge status-soon">Soon</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Moon Tee</td>
+                                            <td>150ml</td>
+                                            <td>2026-08-01</td>
+                                            <td>0</td>
+                                            <td><span class="status-badge status-expired">Expired</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ===== RIGHT COLUMN: Recent Activity ===== -->
+                    <div class="dashboard-right-column">
+                        <div class="dashboard-card activity-card">
+                            <div class="card-header">
+                                <h3>Recent Activity</h3>
+                            </div>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-left">
+                                        <span class="activity-amount">P400</span>
+                                        <span class="activity-id">— POS-260802-4077</span>
+                                    </div>
+                                    <div class="activity-right">
+                                        <span class="activity-user">by Eydi</span>
+                                        <span class="activity-time">5h ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-left">
+                                        <span class="activity-amount">P400</span>
+                                        <span class="activity-id">— POS-260802-4077</span>
+                                    </div>
+                                    <div class="activity-right">
+                                        <span class="activity-user">by Jimmy</span>
+                                        <span class="activity-time">5h ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-left">
+                                        <span class="activity-amount">P250</span>
+                                        <span class="activity-id">— POS-260802-4065</span>
+                                    </div>
+                                    <div class="activity-right">
+                                        <span class="activity-user">by Admin</span>
+                                        <span class="activity-time">12h ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-left">
+                                        <span class="activity-amount">P850</span>
+                                        <span class="activity-id">— POS-260802-4052</span>
+                                    </div>
+                                    <div class="activity-right">
+                                        <span class="activity-user">by Cashier 1</span>
+                                        <span class="activity-time">1d ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-left">
+                                        <span class="activity-amount">P1,200</span>
+                                        <span class="activity-id">— POS-260802-4041</span>
+                                    </div>
+                                    <div class="activity-right">
+                                        <span class="activity-user">by Admin</span>
+                                        <span class="activity-time">2d ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-left">
+                                        <span class="activity-amount">P550</span>
+                                        <span class="activity-id">— POS-260802-4033</span>
+                                    </div>
+                                    <div class="activity-right">
+                                        <span class="activity-user">by Cashier 2</span>
+                                        <span class="activity-time">2d ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <footer class="dashboard-footer">
+                    <p>nightbaby™ @2026 | LLC Registered</p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/global.js"></script>
+</body>
+</html>

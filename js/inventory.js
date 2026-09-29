@@ -1,657 +1,841 @@
-/**
- * nightbaby - Inventory JavaScript
- */
+document.addEventListener('DOMContentLoaded', function () {
 
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("📦 Inventory Page Loaded");
 
-    // ============================================
-    // PRODUCT DETAILS MODAL
-    // ============================================
+    if (typeof loginRequired === 'function') {
+        loginRequired(['admin', 'it']);
+    }
 
-    const modalOverlay = document.getElementById("productModalOverlay");
-    const modalClose = document.getElementById("productModalClose");
-    const modalCloseBtn = document.getElementById("modalCloseBtn");
-    const modalEditBtn = document.getElementById("modalEditBtn");
-    const modalDeleteBtn = document.getElementById("modalDeleteBtn");
-    const modalProductImage = document.getElementById("modalProductImage");
 
-    const detailName = document.getElementById("detailName");
-    const detailCategory = document.getElementById("detailCategory");
-    const detailSku = document.getElementById("detailSku");
-    const detailSize = document.getElementById("detailSize");
-    const detailPrice = document.getElementById("detailPrice");
-    const detailStock = document.getElementById("detailStock");
-    const detailAlert = document.getElementById("detailAlert");
-    const detailTotal = document.getElementById("detailTotal");
-    const detailStatus = document.getElementById("detailStatus");
-    const detailDateAdded = document.getElementById("detailDateAdded");
-    const detailUpdated = document.getElementById("detailUpdated");
+    function getEffectiveStock(p) {
+        if (typeof getCurrentStock === 'function') {
+            return getCurrentStock(p);
+        }
+        return Number(p.stock) || 0;
+    }
 
-    let currentProductData = null;
 
-    function openProductModal(productData) {
-        currentProductData = productData;
-        detailName.textContent = productData.name || "N/A";
-        detailCategory.textContent = productData.category || "N/A";
-        detailSku.textContent = productData.sku || "N/A";
-        detailSize.textContent = productData.size || "N/A";
-        detailPrice.textContent = productData.price || "₱0";
-        detailStock.textContent = productData.stock || "0";
-        detailAlert.textContent = productData.alert || "10";
-        detailTotal.textContent = productData.total || "₱0.00";
-        detailDateAdded.textContent = productData.dateAdded || "2026-01-08";
-        detailUpdated.textContent = productData.updated || "2026-05-08";
+    function generateSku(p) {
+        if (p.sku) return p.sku;
+        var cat = (p.category || 'X').toString().toUpperCase().slice(0, 3);
+        var idNum = Number(p.id) || 0;
+        var padded = String(idNum).padStart(4, '0');
+        return 'NB-' + cat + '-' + padded;
+    }
 
-        if (productData.image) {
-            modalProductImage.src = productData.image;
+
+    function getStatusBadge(stock) {
+        var threshold = Number(getSystemSettings().lowStockThreshold) || 10;
+        if (stock <= 0) {
+            return '<span class="inv-status status-out">Out of Stock</span>';
+        } else if (stock <= threshold) {
+            return '<span class="inv-status status-low">Low Stock</span>';
         } else {
-            modalProductImage.src = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22%231a1714%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-family=%22monospace%22 font-size=%2214%22 fill=%22%235a4f45%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENO IMAGE%3C/text%3E%3C/svg%3E";
+            return '<span class="inv-status status-instock">In Stock</span>';
         }
-
-        const status = productData.status || "In Stock";
-        let statusClass = "status-instock";
-        if (status === "Low Stock") statusClass = "status-low";
-        else if (status === "Out of Stock") statusClass = "status-out";
-        else if (status === "Expires Soon") statusClass = "status-expires";
-        else if (status === "Expired") statusClass = "status-expired";
-        detailStatus.innerHTML = `<span class="inv-status ${statusClass}">${status}</span>`;
-
-        modalOverlay.classList.add("active");
-        document.body.style.overflow = "hidden";
     }
 
-    function closeProductModal() {
-        modalOverlay.classList.remove("active");
-        document.body.style.overflow = "";
-        currentProductData = null;
+
+    function getStatusText(stock) {
+        var threshold = Number(getSystemSettings().lowStockThreshold) || 10;
+        if (stock <= 0) return 'Out of Stock';
+        if (stock <= threshold) return 'Low Stock';
+        return 'In Stock';
     }
 
-    // View buttons
-    document.querySelectorAll(".view-btn").forEach((btn) => {
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            try {
-                const productData = JSON.parse(this.dataset.product);
-                openProductModal(productData);
-            } catch (error) {
-                console.error("Error parsing product data:", error);
+  
+    function getStatusClass(stock) {
+        var threshold = Number(getSystemSettings().lowStockThreshold) || 10;
+        if (stock <= 0) return 'status-out';
+        if (stock <= threshold) return 'status-low';
+        return 'status-instock';
+    }
+
+
+    function allProducts() {
+        if (typeof getProducts === 'function') return getProducts();
+        return [];
+    }
+
+
+    var tbody = document.querySelector('.inventory-table tbody');
+
+
+    function updateStats(list) {
+        var cards = document.querySelectorAll('.inv-stat-card .inv-stat-value');
+        if (!cards || cards.length < 4) return;
+        var totalP = list.length;
+        var inStock = 0;
+        var lowStock = 0;
+        var outStock = 0;
+        var threshold = Number(getSystemSettings().lowStockThreshold) || 10;
+        for (var i = 0; i < list.length; i++) {
+            var s = getEffectiveStock(list[i]);
+            if (s <= 0) outStock++;
+            else if (s <= threshold) lowStock++;
+            else inStock++;
+        }
+        cards[0].textContent = totalP;
+        cards[1].textContent = inStock;
+        cards[2].textContent = lowStock;
+        cards[3].textContent = outStock;
+    }
+
+    function renderInventoryTable(productsArr) {
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        updateStats(productsArr);
+
+        if (productsArr.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:rgba(255,255,255,0.4);">No products found</td></tr>';
+        } else {
+            for (var i = 0; i < productsArr.length; i++) {
+                var p = productsArr[i];
+                var stock = getEffectiveStock(p);
+                var price = Number(p.price) || 0;
+                var formattedPrice = typeof formatCurrency === 'function'
+                    ? formatCurrency(price)
+                    : 'P' + price.toFixed(2);
+                var catCol = p.subcategory || p.category || 'N/A';
+                var sizeVal = p.size || 'N/A';
+                var sku = generateSku(p);
+
+                var tr = document.createElement('tr');
+                tr.setAttribute('data-product-id', String(p.id));
+                tr.innerHTML =
+                    '<td class="product-name">' + escapeHtml(p.name) + '</td>' +
+                    '<td>' + escapeHtml(catCol) + '</td>' +
+                    '<td class="sku-code">' + sku + '</td>' +
+                    '<td>' + escapeHtml(sizeVal) + '</td>' +
+                    '<td class="product-price">' + formattedPrice + '</td>' +
+                    '<td class="stock-count">' + stock + '</td>' +
+                    '<td>' + getStatusBadge(stock) + '</td>' +
+                    '<td>' +
+                    '  <button class="inv-action-btn view-btn" title="View Product" data-id="' + p.id + '">' +
+                    '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />' +
+                    '    </svg>' +
+                    '  </button>' +
+                    '  <button class="inv-action-btn edit-btn" title="Edit" data-id="' + p.id + '">' +
+                    '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />' +
+                    '      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />' +
+                    '    </svg>' +
+                    '  </button>' +
+                    '  <button class="inv-action-btn delete-btn" title="Delete" data-id="' + p.id + '">' +
+                    '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '      <polyline points="3 6 5 6 21 6" />' +
+                    '      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />' +
+                    '    </svg>' +
+                    '  </button>' +
+                    '  <button class="inv-action-btn barcode-btn" title="Generate Barcode" data-id="' + p.id + '">' +
+                    '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '      <path d="M3 5v14M6 5v14M10 5v14M14 5v14M18 5v14M21 5v14" />' +
+                    '    </svg>' +
+                    '  </button>' +
+                    '</td>';
+                tbody.appendChild(tr);
             }
-        });
-    });
-
-    modalClose.addEventListener("click", closeProductModal);
-    modalCloseBtn.addEventListener("click", closeProductModal);
-    modalOverlay.addEventListener("click", function (e) {
-        if (e.target === this) closeProductModal();
-    });
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && modalOverlay.classList.contains("active")) {
-            closeProductModal();
         }
-    });
 
-    // Edit button in product details modal - opens edit modal
-    modalEditBtn.addEventListener("click", function () {
-        if (currentProductData) {
-            closeProductModal();
-            // Small delay to allow modal to close
-            setTimeout(() => {
-                openEditProductModal(currentProductData);
-            }, 300);
+
+        var pagInfo = document.querySelector('.inventory-pagination .pagination-info');
+        if (pagInfo) {
+            var n = productsArr.length;
+            pagInfo.textContent = n === 0
+                ? 'Showing 0 results'
+                : 'Showing 1 to ' + n + ' of ' + n + ' results';
         }
-    });
 
-    // Delete button in product details modal - opens delete confirmation
-    modalDeleteBtn.addEventListener("click", function () {
-        if (currentProductData) {
-            closeProductModal();
-            setTimeout(() => {
-                openDeleteProductModal(currentProductData);
-            }, 300);
-        }
-    });
 
-    // ============================================
-    // SEARCH & FILTERS
-    // ============================================
-
-    const searchInput = document.querySelector(".inventory-search-filters .search-input");
-    const categoryFilter = document.querySelector(".inventory-search-filters .filter-group .filter-select:first-of-type");
-    const statusFilter = document.querySelector(".inventory-search-filters .filter-group .filter-select:last-of-type");
-
-    function filterTable() {
-        const query = searchInput ? searchInput.value.toLowerCase() : "";
-        const category = categoryFilter ? categoryFilter.value : "All Categories";
-        const status = statusFilter ? statusFilter.value : "All Status";
-
-        document.querySelectorAll(".inventory-table tbody tr").forEach((row) => {
-            const text = row.textContent.toLowerCase();
-            const rowCategory = row.querySelector("td:nth-child(2)")?.textContent || "";
-            const rowStatus = row.querySelector(".inv-status")?.textContent || "";
-            let show = true;
-            if (query && !text.includes(query)) show = false;
-            if (category !== "All Categories" && !rowCategory.includes(category)) show = false;
-            if (status !== "All Status" && !rowStatus.includes(status)) show = false;
-            row.style.display = show ? "" : "none";
-        });
+        bindRowButtons();
     }
 
-    if (searchInput) searchInput.addEventListener("input", filterTable);
-    if (categoryFilter) categoryFilter.addEventListener("change", filterTable);
-    if (statusFilter) statusFilter.addEventListener("change", filterTable);
 
-    // ============================================
-    // PAGINATION
-    // ============================================
-
-    const paginationBtns = document.querySelectorAll(".inventory-pagination .pagination-btn:not(.prev-btn):not(.next-btn)");
-    paginationBtns.forEach((btn) => {
-        btn.addEventListener("click", function () {
-            paginationBtns.forEach((b) => b.classList.remove("active"));
-            this.classList.add("active");
-        });
-    });
-
-    const prevBtn = document.querySelector(".inventory-pagination .prev-btn");
-    const nextBtn = document.querySelector(".inventory-pagination .next-btn");
-    let currentPage = 1;
-    const totalPages = 5;
-
-    function updatePagination() {
-        paginationBtns.forEach((btn, index) => {
-            btn.classList.toggle("active", index + 1 === currentPage);
-        });
+    function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
-    if (prevBtn) {
-        prevBtn.addEventListener("click", function () {
-            if (currentPage > 1) { currentPage--;
-                updatePagination(); }
-        });
-    }
-    if (nextBtn) {
-        nextBtn.addEventListener("click", function () {
-            if (currentPage < totalPages) { currentPage++;
-                updatePagination(); }
-        });
-    }
 
-    // ============================================
-    // TABLE ACTION BUTTONS
-    // ============================================
+    function filterAndRender() {
+        var list = allProducts();
+        var searchEl = document.querySelector('.inventory-search-filters .search-input');
+        var filterSelects = document.querySelectorAll('.inventory-search-filters .filter-select');
+        var q = searchEl ? searchEl.value.toLowerCase().trim() : '';
 
-    // Edit buttons in table - opens edit modal
-    document.querySelectorAll(".edit-btn").forEach((btn) => {
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const row = this.closest("tr");
-            if (row) {
-                const productData = {
-                    name: row.querySelector(".product-name")?.textContent || "N/A",
-                    category: row.querySelector("td:nth-child(2)")?.textContent || "N/A",
-                    sku: row.querySelector(".sku-code")?.textContent || "N/A",
-                    size: row.querySelector("td:nth-child(4)")?.textContent || "N/A",
-                    price: row.querySelector(".product-price")?.textContent || "₱0",
-                    stock: row.querySelector(".stock-count")?.textContent || "0",
-                    alert: "10",
-                    status: row.querySelector(".inv-status")?.textContent || "In Stock",
-                    dateAdded: "2026-01-08",
-                    updated: "2026-05-08",
-                };
-                openEditProductModal(productData);
-            }
-        });
-    });
+        var categoryFilter = 'All Categories';
+        var statusFilter = 'All Status';
+        if (filterSelects && filterSelects.length >= 2) {
+            categoryFilter = filterSelects[0].value;
+            statusFilter = filterSelects[1].value;
+        } else if (filterSelects && filterSelects.length >= 1) {
 
-    // Delete buttons in table - opens delete confirmation
-    document.querySelectorAll(".delete-btn").forEach((btn) => {
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const row = this.closest("tr");
-            if (row) {
-                const productData = {
-                    name: row.querySelector(".product-name")?.textContent || "N/A",
-                    sku: row.querySelector(".sku-code")?.textContent || "N/A",
-                    category: row.querySelector("td:nth-child(2)")?.textContent || "N/A",
-                    size: row.querySelector("td:nth-child(4)")?.textContent || "N/A",
-                    price: row.querySelector(".product-price")?.textContent || "₱0",
-                    stock: row.querySelector(".stock-count")?.textContent || "0",
-                };
-                openDeleteProductModal(productData);
-            }
-        });
-    });
-
-    // ============================================
-    // ADD PRODUCT MODAL
-    // ============================================
-
-    const addModalOverlay = document.getElementById("addProductModalOverlay");
-    const addModalClose = document.getElementById("addProductModalClose");
-    const addModalCloseBtn = document.getElementById("addProductCloseBtn");
-    const addModalSaveBtn = document.getElementById("addProductSaveBtn");
-    const addProductForm = document.getElementById("addProductForm");
-    const imageUploadArea = document.getElementById("imageUploadArea");
-    const productImageUpload = document.getElementById("productImageUpload");
-
-    function openAddProductModal() {
-        console.log("Opening Add Product Modal");
-        addModalOverlay.classList.add("active");
-        document.body.style.overflow = "hidden";
-        addProductForm.reset();
-        imageUploadArea.classList.remove("has-image");
-        const preview = imageUploadArea.querySelector(".upload-preview");
-        if (preview) preview.remove();
-        const svg = imageUploadArea.querySelector("svg");
-        const span = imageUploadArea.querySelector("span");
-        const small = imageUploadArea.querySelector("small");
-        if (svg) svg.style.display = "";
-        if (span) span.style.display = "";
-        if (small) small.style.display = "";
-        document.getElementById("addProductName").value = "MISFIT Gothic Black Shirt";
-        document.getElementById("addProductSku").value = "NB-TS-001";
-        document.getElementById("addProductPrice").value = "550";
-        document.getElementById("addProductLowStock").value = "10";
-        document.getElementById("addProductStock").value = "100";
-        document.getElementById("addProductExpiration").value = "2028-01-08";
-        document.getElementById("addProductCategory").value = "shirt";
-        document.getElementById("addProductSize").value = "M";
-    }
-
-    function closeAddProductModal() {
-        addModalOverlay.classList.remove("active");
-        document.body.style.overflow = "";
-    }
-
-    function resetUploadArea() {
-        const preview = imageUploadArea.querySelector(".upload-preview");
-        if (preview) preview.remove();
-        const svg = imageUploadArea.querySelector("svg");
-        const span = imageUploadArea.querySelector("span");
-        const small = imageUploadArea.querySelector("small");
-        if (svg) svg.style.display = "";
-        if (span) span.style.display = "";
-        if (small) small.style.display = "";
-        imageUploadArea.classList.remove("has-image");
-        productImageUpload.value = "";
-    }
-
-    productImageUpload.addEventListener("change", function (e) {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const existingPreview = imageUploadArea.querySelector(".upload-preview");
-                if (existingPreview) existingPreview.remove();
-                const svg = imageUploadArea.querySelector("svg");
-                const span = imageUploadArea.querySelector("span");
-                const small = imageUploadArea.querySelector("small");
-                if (svg) svg.style.display = "none";
-                if (span) span.style.display = "none";
-                if (small) small.style.display = "none";
-                const img = document.createElement("img");
-                img.src = event.target.result;
-                img.className = "upload-preview";
-                img.alt = "Product preview";
-                imageUploadArea.appendChild(img);
-                imageUploadArea.classList.add("has-image");
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    addModalClose.addEventListener("click", function () { closeAddProductModal();
-        resetUploadArea(); });
-    addModalCloseBtn.addEventListener("click", function () { closeAddProductModal();
-        resetUploadArea(); });
-    addModalOverlay.addEventListener("click", function (e) {
-        if (e.target === this) { closeAddProductModal();
-            resetUploadArea(); }
-    });
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && addModalOverlay.classList.contains("active")) {
-            closeAddProductModal();
-            resetUploadArea();
-        }
-    });
-
-    addModalSaveBtn.addEventListener("click", function () {
-        const productData = {
-            name: document.getElementById("addProductName").value,
-            sku: document.getElementById("addProductSku").value,
-            price: document.getElementById("addProductPrice").value,
-            lowStockAlert: document.getElementById("addProductLowStock").value,
-            category: document.getElementById("addProductCategory").value,
-            size: document.getElementById("addProductSize").value,
-            stock: document.getElementById("addProductStock").value,
-            expiration: document.getElementById("addProductExpiration").value,
-        };
-        if (!productData.name || !productData.sku) {
-            showNotification("Please fill in all required fields", "error");
-            return;
-        }
-        closeAddProductModal();
-        resetUploadArea();
-        showNotification('Product "' + productData.name + '" added successfully!', "success");
-        console.log("New Product:", productData);
-    });
-
-    // Add Product button
-    const addProductBtn = document.querySelector(".add-product-btn");
-    if (addProductBtn) {
-        addProductBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            openAddProductModal();
-        });
-    }
-
-    // ============================================
-    // EDIT PRODUCT MODAL
-    // ============================================
-
-    const editModalOverlay = document.getElementById("editProductModalOverlay");
-    const editModalClose = document.getElementById("editProductModalClose");
-    const editModalCloseBtn = document.getElementById("editProductCloseBtn");
-    const editModalSaveBtn = document.getElementById("editProductSaveBtn");
-    const editProductForm = document.getElementById("editProductForm");
-    const editImageUploadArea = document.getElementById("editImageUploadArea");
-    const editProductImageUpload = document.getElementById("editProductImageUpload");
-
-    const editProductName = document.getElementById("editProductName");
-    const editProductSku = document.getElementById("editProductSku");
-    const editProductPrice = document.getElementById("editProductPrice");
-    const editProductLowStock = document.getElementById("editProductLowStock");
-    const editProductCategory = document.getElementById("editProductCategory");
-    const editProductSize = document.getElementById("editProductSize");
-    const editProductStock = document.getElementById("editProductStock");
-    const editProductExpiration = document.getElementById("editProductExpiration");
-
-    let currentEditProductData = null;
-
-    function openEditProductModal(productData) {
-        currentEditProductData = productData;
-        editProductName.value = productData.name || "";
-        editProductSku.value = productData.sku || "";
-        editProductPrice.value = productData.price ? productData.price.replace(/[₱,]/g, '') : "";
-        editProductLowStock.value = productData.alert || "10";
-        editProductCategory.value = productData.category ? productData.category.toLowerCase() : "shirt";
-        editProductSize.value = productData.size || "M";
-        editProductStock.value = productData.stock || "0";
-        editProductExpiration.value = productData.dateAdded || "2028-01-08";
-
-        editImageUploadArea.classList.remove("has-image");
-        const preview = editImageUploadArea.querySelector(".upload-preview");
-        if (preview) preview.remove();
-        const svg = editImageUploadArea.querySelector("svg");
-        const span = editImageUploadArea.querySelector("span");
-        const small = editImageUploadArea.querySelector("small");
-        if (svg) svg.style.display = "";
-        if (span) span.style.display = "";
-        if (small) small.style.display = "";
-        editProductImageUpload.value = "";
-
-        editModalOverlay.classList.add("active");
-        document.body.style.overflow = "hidden";
-    }
-
-    function closeEditProductModal() {
-        editModalOverlay.classList.remove("active");
-        document.body.style.overflow = "";
-        currentEditProductData = null;
-    }
-
-    function resetEditUploadArea() {
-        const preview = editImageUploadArea.querySelector(".upload-preview");
-        if (preview) preview.remove();
-        const svg = editImageUploadArea.querySelector("svg");
-        const span = editImageUploadArea.querySelector("span");
-        const small = editImageUploadArea.querySelector("small");
-        if (svg) svg.style.display = "";
-        if (span) span.style.display = "";
-        if (small) small.style.display = "";
-        editImageUploadArea.classList.remove("has-image");
-        editProductImageUpload.value = "";
-    }
-
-    editProductImageUpload.addEventListener("change", function (e) {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const existingPreview = editImageUploadArea.querySelector(".upload-preview");
-                if (existingPreview) existingPreview.remove();
-                const svg = editImageUploadArea.querySelector("svg");
-                const span = editImageUploadArea.querySelector("span");
-                const small = editImageUploadArea.querySelector("small");
-                if (svg) svg.style.display = "none";
-                if (span) span.style.display = "none";
-                if (small) small.style.display = "none";
-                const img = document.createElement("img");
-                img.src = event.target.result;
-                img.className = "upload-preview";
-                img.alt = "Product preview";
-                editImageUploadArea.appendChild(img);
-                editImageUploadArea.classList.add("has-image");
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    editModalClose.addEventListener("click", function () { closeEditProductModal();
-        resetEditUploadArea(); });
-    editModalCloseBtn.addEventListener("click", function () { closeEditProductModal();
-        resetEditUploadArea(); });
-    editModalOverlay.addEventListener("click", function (e) {
-        if (e.target === this) { closeEditProductModal();
-            resetEditUploadArea(); }
-    });
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && editModalOverlay.classList.contains("active")) {
-            closeEditProductModal();
-            resetEditUploadArea();
-        }
-    });
-
-    editModalSaveBtn.addEventListener("click", function () {
-        const productData = {
-            name: editProductName.value,
-            sku: editProductSku.value,
-            price: editProductPrice.value,
-            lowStockAlert: editProductLowStock.value,
-            category: editProductCategory.value,
-            size: editProductSize.value,
-            stock: editProductStock.value,
-            expiration: editProductExpiration.value,
-        };
-        if (!productData.name || !productData.sku) {
-            showNotification("Please fill in all required fields", "error");
-            return;
-        }
-        closeEditProductModal();
-        resetEditUploadArea();
-        showNotification('Product "' + productData.name + '" updated successfully!', "success");
-        console.log("Updated Product:", productData);
-    });
-
-    // ============================================
-    // ADJUST STOCK MODAL
-    // ============================================
-
-    const adjustModalOverlay = document.getElementById("adjustStockModalOverlay");
-    const adjustModalClose = document.getElementById("adjustStockModalClose");
-    const adjustModalCloseBtn = document.getElementById("adjustStockCloseBtn");
-    const adjustModalSaveBtn = document.getElementById("adjustStockSaveBtn");
-    const adjustStockForm = document.getElementById("adjustStockForm");
-
-    const adjustStockProductName = document.getElementById("adjustStockProductName");
-    const adjustStockType = document.getElementById("adjustStockType");
-    const adjustStockQuantity = document.getElementById("adjustStockQuantity");
-    const adjustStockReason = document.getElementById("adjustStockReason");
-    const adjustStockNotes = document.getElementById("adjustStockNotes");
-
-    function openAdjustStockModal(productData) {
-        adjustStockProductName.value = productData.name || "N/A";
-        adjustStockType.value = "+";
-        adjustStockQuantity.value = "50";
-        adjustStockReason.value = "Customer Return";
-        adjustStockNotes.value = "Additional Notes......";
-        adjustModalOverlay.classList.add("active");
-        document.body.style.overflow = "hidden";
-    }
-
-    function closeAdjustStockModal() {
-        adjustModalOverlay.classList.remove("active");
-        document.body.style.overflow = "";
-    }
-
-    adjustModalClose.addEventListener("click", closeAdjustStockModal);
-    adjustModalCloseBtn.addEventListener("click", closeAdjustStockModal);
-    adjustModalOverlay.addEventListener("click", function (e) {
-        if (e.target === this) closeAdjustStockModal();
-    });
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && adjustModalOverlay.classList.contains("active")) {
-            closeAdjustStockModal();
-        }
-    });
-
-    adjustModalSaveBtn.addEventListener("click", function () {
-        const adjustmentData = {
-            productName: adjustStockProductName.value,
-            type: adjustStockType.value,
-            quantity: adjustStockQuantity.value,
-            reason: adjustStockReason.value,
-            notes: adjustStockNotes.value,
-        };
-        if (!adjustmentData.quantity || parseInt(adjustmentData.quantity) <= 0) {
-            showNotification("Please enter a valid quantity", "error");
-            return;
-        }
-        closeAdjustStockModal();
-        const typeText = adjustmentData.type === "+" ? "added to" : "removed from";
-        showNotification('Stock ' + typeText + ' "' + adjustmentData.productName + '" successfully!', "success");
-        console.log("Stock Adjustment:", adjustmentData);
-    });
-
-    // Adjust Stock button
-    const adjustStockBtn = document.querySelector(".adjust-stock-btn");
-    if (adjustStockBtn) {
-        adjustStockBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            const firstRow = document.querySelector(".inventory-table tbody tr");
-            if (firstRow) {
-                const productData = {
-                    name: firstRow.querySelector(".product-name")?.textContent || "N/A",
-                };
-                openAdjustStockModal(productData);
-            } else {
-                openAdjustStockModal({ name: "Sample Product" });
-            }
-        });
-    }
-
-    // ============================================
-    // DELETE PRODUCT MODAL
-    // ============================================
-
-    const deleteModalOverlay = document.getElementById("deleteProductModalOverlay");
-    const deleteModalClose = document.getElementById("deleteProductModalClose");
-    const deleteModalCloseBtn = document.getElementById("deleteProductCloseBtn");
-    const deleteModalConfirmBtn = document.getElementById("deleteProductConfirmBtn");
-    const deleteProductName = document.getElementById("deleteProductName");
-    const deleteProductSku = document.getElementById("deleteProductSku");
-
-    let currentDeleteProductData = null;
-
-    function openDeleteProductModal(productData) {
-        currentDeleteProductData = productData;
-        deleteProductName.textContent = productData.name || "N/A";
-        deleteProductSku.textContent = productData.sku || "N/A";
-        deleteModalOverlay.classList.add("active");
-        document.body.style.overflow = "hidden";
-    }
-
-    function closeDeleteProductModal() {
-        deleteModalOverlay.classList.remove("active");
-        document.body.style.overflow = "";
-        currentDeleteProductData = null;
-    }
-
-    deleteModalClose.addEventListener("click", closeDeleteProductModal);
-    deleteModalCloseBtn.addEventListener("click", closeDeleteProductModal);
-    deleteModalOverlay.addEventListener("click", function (e) {
-        if (e.target === this) closeDeleteProductModal();
-    });
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape" && deleteModalOverlay.classList.contains("active")) {
-            closeDeleteProductModal();
-        }
-    });
-
-    deleteModalConfirmBtn.addEventListener("click", function () {
-        if (currentDeleteProductData) {
-            closeDeleteProductModal();
-            showNotification('Product "' + currentDeleteProductData.name + '" deleted successfully!', "success");
-            console.log("Deleted Product:", currentDeleteProductData);
-            
-            // Remove the row from the table
-            const rows = document.querySelectorAll(".inventory-table tbody tr");
-            rows.forEach((row) => {
-                const name = row.querySelector(".product-name")?.textContent || "";
-                const sku = row.querySelector(".sku-code")?.textContent || "";
-                if (name === currentDeleteProductData.name && sku === currentDeleteProductData.sku) {
-                    row.remove();
+            var firstLabel = filterSelects[0].closest('.filter-group');
+            if (firstLabel) {
+                var lab = firstLabel.querySelector('label');
+                if (lab && lab.textContent.toLowerCase().indexOf('category') >= 0) {
+                    categoryFilter = filterSelects[0].value;
+                } else {
+                    statusFilter = filterSelects[0].value;
                 }
+            }
+        }
+
+        var filtered = [];
+        for (var i = 0; i < list.length; i++) {
+            var p = list[i];
+            var stock = getEffectiveStock(p);
+            var statusText = getStatusText(stock);
+            var catText = p.subcategory || p.category || '';
+
+
+            if (categoryFilter !== 'All Categories' && categoryFilter !== '') {
+                var cf = categoryFilter.toLowerCase();
+                var sub = (p.subcategory || '').toLowerCase();
+                var pc = (p.category || '').toLowerCase();
+                if (sub !== cf && pc !== cf && catText.toLowerCase().indexOf(cf) < 0) {
+                    continue;
+                }
+            }
+
+
+            if (statusFilter !== 'All Status' && statusFilter !== '') {
+                if (statusFilter.toLowerCase() !== statusText.toLowerCase()) {
+                    if (statusFilter === 'Expires Soon' || statusFilter === 'Expired') {
+                        continue;
+                    }
+                    continue;
+                }
+            }
+
+
+            if (q) {
+                var haystack = (
+                    (p.name || '') + ' ' +
+                    (p.subcategory || '') + ' ' +
+                    (p.category || '') + ' ' +
+                    generateSku(p)
+                ).toLowerCase();
+                if (haystack.indexOf(q) < 0) continue;
+            }
+
+            filtered.push(p);
+        }
+
+        renderInventoryTable(filtered);
+    }
+
+
+    function bindRowButtons() {
+        if (!tbody) return;
+
+        tbody.querySelectorAll('.view-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                var p = getProductByIdSafe(id);
+                if (p) openViewModal(p);
             });
-            
-            // Update the stats if needed
-            updateStats();
+        });
+
+        tbody.querySelectorAll('.edit-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                var p = getProductByIdSafe(id);
+                if (p) openEditModal(p);
+            });
+        });
+
+        tbody.querySelectorAll('.delete-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                var p = getProductByIdSafe(id);
+                if (p) openDeleteModal(p);
+            });
+        });
+
+        tbody.querySelectorAll('.barcode-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var p = getProductByIdSafe(this.getAttribute('data-id'));
+                if (p) openBarcodeModal(p);
+            });
+        });
+    }
+
+    function getProductByIdSafe(id) {
+        if (typeof getProductById === 'function') {
+            return getProductById(id);
+        }
+        var list = allProducts();
+        for (var i = 0; i < list.length; i++) {
+            if (String(list[i].id) === String(id)) return list[i];
+        }
+        return null;
+    }
+
+
+
+    function closeModal(overlayId) {
+        var ov = document.getElementById(overlayId);
+        if (ov) ov.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    function openModal(overlayId) {
+        var ov = document.getElementById(overlayId);
+        if (ov) ov.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function bindModalClose(overlayId, closeBtnIds) {
+        var ov = document.getElementById(overlayId);
+        if (!ov) return;
+        if (!ov.__boundClose) {
+            ov.__boundClose = true;
+            ov.addEventListener('click', function (e) {
+                if (e.target === ov) closeModal(overlayId);
+            });
+            for (var i = 0; i < closeBtnIds.length; i++) {
+                var btn = document.getElementById(closeBtnIds[i]);
+                if (btn) btn.addEventListener('click', function () { closeModal(overlayId); });
+            }
+        }
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.product-modal-overlay.active').forEach(function (ov) {
+                ov.classList.remove('active');
+            });
+            document.body.style.overflow = '';
         }
     });
 
-    // ============================================
-    // UPDATE STATS FUNCTION
-    // ============================================
 
-    function updateStats() {
-        const rows = document.querySelectorAll(".inventory-table tbody tr");
-        const totalProducts = rows.length;
-        const totalProductsDisplay = document.querySelector(".inv-stat-card .inv-stat-value");
-        if (totalProductsDisplay) {
-            // This would need to be more sophisticated in a real app
-            // For now, just count visible rows
-            let visibleCount = 0;
-            rows.forEach(row => {
-                if (row.style.display !== "none") visibleCount++;
-            });
-            // Update the stats display
-            // This is simplified - in a real app you'd have proper data
+    bindModalClose('productModalOverlay', ['productModalClose', 'modalCloseBtn']);
+    bindModalClose('addProductModalOverlay', ['addProductModalClose', 'addProductCloseBtn']);
+    bindModalClose('editProductModalOverlay', ['editProductModalClose', 'editProductCloseBtn']);
+    bindModalClose('adjustStockModalOverlay', ['adjustStockModalClose', 'adjustStockCloseBtn']);
+    bindModalClose('deleteProductModalOverlay', ['deleteProductModalClose', 'deleteProductCloseBtn']);
+    bindModalClose('barcodeModalOverlay', ['barcodeModalClose', 'barcodeCloseBtn']);
+
+    function barcodeValue(product) {
+        return String(product.id);
+    }
+
+    function renderBarcode(product, target) {
+        if (!target || typeof JsBarcode !== 'function') return;
+        target.innerHTML = '';
+        JsBarcode(target, barcodeValue(product), {
+            format: 'CODE128',
+            displayValue: false,
+            height: 72,
+            margin: 8,
+            lineColor: '#111111',
+            background: '#ffffff'
+        });
+    }
+
+    function openBarcodeModal(product) {
+        var top = document.getElementById('barcodeLabelTop');
+        var bottom = document.getElementById('barcodeLabelBottom');
+        var sku = document.getElementById('barcodeSku');
+        var price = document.getElementById('barcodePrice');
+        var stock = document.getElementById('barcodeStock');
+        if (top) top.textContent = product.name || 'Product';
+        if (bottom) bottom.textContent = barcodeValue(product);
+        if (sku) sku.textContent = generateSku(product);
+        if (price) price.textContent = typeof formatCurrency === 'function' ? formatCurrency(Number(product.price) || 0) : 'P' + (Number(product.price) || 0).toFixed(2);
+        if (stock) stock.textContent = getEffectiveStock(product);
+        renderBarcode(product, document.getElementById('barcodeCanvas'));
+        var printBtn = document.getElementById('printSingleBarcodeBtn');
+        if (printBtn) printBtn.onclick = function () { printBarcodes([product]); };
+        openModal('barcodeModalOverlay');
+    }
+
+    function printBarcodes(products) {
+        var container = document.getElementById('printBarcodesContainer');
+        if (!container || typeof JsBarcode !== 'function' || !products.length) return;
+        container.innerHTML = '<div class="print-area"><h1>nightbaby Inventory Barcodes</h1><div class="print-barcode-grid"></div></div>';
+        var grid = container.querySelector('.print-barcode-grid');
+        products.forEach(function (product) {
+            var label = document.createElement('div');
+            label.className = 'print-barcode-label';
+            label.innerHTML = '<strong>' + escapeHtml(product.name || 'Product') + '</strong><svg></svg><span>' + escapeHtml(barcodeValue(product)) + '</span>';
+            grid.appendChild(label);
+            renderBarcode(product, label.querySelector('svg'));
+        });
+        window.print();
+    }
+
+    var printInventoryBtn = document.querySelector('.print-inventory-btn');
+    if (printInventoryBtn) printInventoryBtn.addEventListener('click', function () { printBarcodes(allProducts()); });
+
+    function exportBarcodesPdf(products) {
+        if (!products.length) {
+            if (typeof showNotification === 'function') showNotification('No products available to export.', 'error');
+            return;
         }
+        if (!window.jspdf || typeof window.jspdf.jsPDF !== 'function') {
+            if (typeof showNotification === 'function') showNotification('PDF library is not available. Check your internet connection.', 'error');
+            return;
+        }
+
+        var doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        var pageWidth = 210;
+        var pageHeight = 297;
+        var margin = 8;
+        var columns = 4;
+        var gap = 3;
+        var cellWidth = (pageWidth - (margin * 2) - (gap * (columns - 1))) / columns;
+        var cellHeight = 28;
+        var startY = 18;
+        var row = 0;
+
+        doc.setFontSize(12);
+        doc.text('nightbaby Inventory Barcodes', pageWidth / 2, 10, { align: 'center' });
+
+        products.forEach(function (product, index) {
+            var column = index % columns;
+            if (index > 0 && column === 0) row++;
+            var x = margin + column * (cellWidth + gap);
+            var y = startY + row * (cellHeight + gap);
+            if (y + cellHeight > pageHeight - margin) {
+                doc.addPage();
+                row = 0;
+                y = startY;
+                doc.setFontSize(12);
+                doc.text('nightbaby Inventory Barcodes', pageWidth / 2, 10, { align: 'center' });
+            }
+
+            var barcodeCanvas = document.createElement('canvas');
+            JsBarcode(barcodeCanvas, barcodeValue(product), {
+                format: 'CODE128',
+                displayValue: false,
+                width: 2,
+                height: 46,
+                margin: 0,
+                lineColor: '#111111',
+                background: '#ffffff'
+            });
+
+            doc.setDrawColor(210, 210, 210);
+            doc.rect(x, y, cellWidth, cellHeight);
+            doc.setTextColor(20, 20, 20);
+            doc.setFontSize(7);
+            doc.text(String(product.name || 'Product').slice(0, 30), x + cellWidth / 2, y + 4, { align: 'center' });
+            doc.addImage(barcodeCanvas.toDataURL('image/png'), 'PNG', x + 3, y + 6, cellWidth - 6, 15);
+            doc.setFontSize(8);
+            doc.text(barcodeValue(product), x + cellWidth / 2, y + 25, { align: 'center' });
+        });
+
+        doc.save('nightbaby-barcodes-' + new Date().toISOString().slice(0, 10) + '.pdf');
     }
 
-    // ============================================
-    // NOTIFICATIONS
-    // ============================================
+    var exportPdfBtn = document.querySelector('.export-pdf-btn');
+    if (exportPdfBtn) exportPdfBtn.addEventListener('click', function () {
+        exportBarcodesPdf(allProducts());
+    });
 
-    function showNotification(message, type = "info") {
-        const existing = document.querySelector(".pos-notification");
-        if (existing) existing.remove();
 
-        const notification = document.createElement("div");
-        notification.className = `pos-notification pos-notification-${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
+    function openViewModal(p) {
+        var stock = getEffectiveStock(p);
+        var price = Number(p.price) || 0;
+        var formattedPrice = typeof formatCurrency === 'function'
+            ? formatCurrency(price)
+            : 'P' + price.toFixed(2);
+        var totalValue = price * stock;
+        var formattedTotal = typeof formatCurrency === 'function'
+            ? formatCurrency(totalValue)
+            : 'P' + totalValue.toFixed(2);
 
-        setTimeout(() => {
-            notification.classList.add("show");
-        }, 10);
+        var elName = document.getElementById('detailName');
+        var elCat = document.getElementById('detailCategory');
+        var elSku = document.getElementById('detailSku');
+        var elSize = document.getElementById('detailSize');
+        var elPrice = document.getElementById('detailPrice');
+        var elStock = document.getElementById('detailStock');
+        var elAlert = document.getElementById('detailAlert');
+        var elTotal = document.getElementById('detailTotal');
+        var elStatus = document.getElementById('detailStatus');
+        var elDate = document.getElementById('detailDateAdded');
+        var elUpdated = document.getElementById('detailUpdated');
+        var elImg = document.getElementById('modalProductImage');
 
-        setTimeout(() => {
-            notification.classList.remove("show");
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 3000);
+        if (elName) elName.textContent = p.name || 'N/A';
+        if (elCat) elCat.textContent = p.subcategory || p.category || 'N/A';
+        if (elSku) elSku.textContent = generateSku(p);
+        if (elSize) elSize.textContent = p.size || 'N/A';
+        if (elPrice) elPrice.textContent = formattedPrice;
+        if (elStock) elStock.textContent = stock;
+        if (elAlert) elAlert.textContent = p.lowStockAlert || p.alert || '10';
+        if (elTotal) elTotal.textContent = formattedTotal;
+        if (elStatus) {
+            elStatus.innerHTML = '<span class="inv-status ' + getStatusClass(stock) + '">' + getStatusText(stock) + '</span>';
+        }
+        if (elDate) elDate.textContent = p.dateAdded || 'N/A';
+        if (elUpdated) elUpdated.textContent = p.updated || p.updatedAt || 'N/A';
+        if (elImg && p.image) {
+            elImg.src = p.image;
+        } else if (elImg) {
+            elImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a1714'/%3E%3Ctext x='50%25' y='50%25' font-family='monospace' font-size='14' fill='%235a4f45' text-anchor='middle' dy='.3em'%3ENO IMAGE%3C/text%3E%3C/svg%3E";
+        }
+
+
+        var editBtn = document.getElementById('modalEditBtn');
+        if (editBtn) {
+            editBtn.onclick = function () {
+                closeModal('productModalOverlay');
+                setTimeout(function () { openEditModal(p); }, 200);
+            };
+        }
+        var delBtn = document.getElementById('modalDeleteBtn');
+        if (delBtn) {
+            delBtn.onclick = function () {
+                closeModal('productModalOverlay');
+                setTimeout(function () { openDeleteModal(p); }, 200);
+            };
+        }
+
+        openModal('productModalOverlay');
     }
+
+    var addProductBtn = document.querySelector('.add-product-btn');
+    if (addProductBtn) {
+        addProductBtn.addEventListener('click', function () { openAddModal(); });
+    }
+    function openAddModal() {
+        var f = document.getElementById('addProductForm');
+        if (f) f.reset();
+        openModal('addProductModalOverlay');
+    }
+
+    var addSaveBtn = document.getElementById('addProductSaveBtn');
+    if (addSaveBtn) {
+        addSaveBtn.addEventListener('click', function () {
+            var nameEl = document.getElementById('addProductName');
+            var priceEl = document.getElementById('addProductPrice');
+            var stockEl = document.getElementById('addProductStock');
+            var catEl = document.getElementById('addProductCategory');
+            var subcatEl = document.getElementById('addProductSubcategory');
+            var sizeEl = document.getElementById('addProductSize');
+            var skuEl = document.getElementById('addProductSku');
+            var alertEl = document.getElementById('addProductLowStock');
+            var discountEl = document.getElementById('addProductDiscount');
+            var expEl = document.getElementById('addProductExpiration');
+
+            var name = nameEl ? nameEl.value.trim() : '';
+            var price = priceEl ? Number(priceEl.value) : 0;
+            var stock = stockEl ? Number(stockEl.value) : 0;
+            var discount = discountEl ? Number(discountEl.value) : 0;
+            var category = catEl ? catEl.value : '';
+
+            if (!name) {
+                if (typeof showNotification === 'function') showNotification('Product name is required', 'error');
+                return;
+            }
+            if (!category) {
+                if (typeof showNotification === 'function') showNotification('Category is required', 'error');
+                return;
+            }
+            if (isNaN(price) || price < 0) {
+                if (typeof showNotification === 'function') showNotification('Valid price is required', 'error');
+                return;
+            }
+            if (isNaN(stock) || stock < 0) {
+                if (typeof showNotification === 'function') showNotification('Valid stock is required', 'error');
+                return;
+            }
+            if (isNaN(discount) || discount < 0 || discount > 100) {
+                if (typeof showNotification === 'function') showNotification('Discount must be between 0 and 100', 'error');
+                return;
+            }
+
+            var newProduct = {
+                name: name,
+                category: category,
+                subcategory: subcatEl ? subcatEl.value : '',
+                price: price,
+                discount: discount,
+                stock: stock,
+                size: sizeEl ? sizeEl.value : 'N/A',
+                sku: skuEl ? skuEl.value.trim() : '',
+                lowStockAlert: alertEl ? Number(alertEl.value) || 10 : 10,
+                expiration: expEl ? expEl.value : '',
+                image: '',
+                dateAdded: typeof getCurrentDateTime === 'function' ? getCurrentDateTime() : new Date().toLocaleString(),
+                updated: typeof getCurrentDateTime === 'function' ? getCurrentDateTime() : new Date().toLocaleString()
+            };
+
+            if (typeof addProduct === 'function') {
+                addProduct(newProduct);
+            } else {
+                var list = allProducts();
+                var newId = 1;
+                for (var xi = 0; xi < list.length; xi++) newId = Math.max(newId, Number(list[xi].id) + 1);
+                newProduct.id = newId;
+                list.push(newProduct);
+                if (typeof saveProducts === 'function') saveProducts(list);
+            }
+
+            if (typeof showNotification === 'function') {
+                showNotification('Product "' + name + '" added successfully!', 'success');
+            }
+            closeModal('addProductModalOverlay');
+            filterAndRender();
+        });
+    }
+    var currentEditId = null;
+    function openEditModal(p) {
+        currentEditId = p.id;
+        var nameEl = document.getElementById('editProductName');
+        var skuEl = document.getElementById('editProductSku');
+        var priceEl = document.getElementById('editProductPrice');
+        var discountEl = document.getElementById('editProductDiscount');
+        var alertEl = document.getElementById('editProductLowStock');
+        var catEl = document.getElementById('editProductCategory');
+        var sizeEl = document.getElementById('editProductSize');
+        var stockEl = document.getElementById('editProductStock');
+        var expEl = document.getElementById('editProductExpiration');
+
+        if (nameEl) nameEl.value = p.name || '';
+        if (skuEl) skuEl.value = generateSku(p);
+        if (priceEl) priceEl.value = Number(p.price) || 0;
+        if (discountEl) discountEl.value = Number(p.discount) || 0;
+        if (alertEl) alertEl.value = Number(p.lowStockAlert || p.alert) || 10;
+        if (catEl) {
+            var found = false;
+            for (var i = 0; i < catEl.options.length; i++) {
+                var ov = catEl.options[i].value.toLowerCase();
+                var pc = (p.category || '').toLowerCase();
+                var ps = (p.subcategory || '').toLowerCase();
+                if (ov === pc || ov === ps) {
+                    catEl.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found && catEl.options.length > 0) catEl.selectedIndex = 0;
+        }
+        if (sizeEl) {
+            var szFound = false;
+            for (var s = 0; s < sizeEl.options.length; s++) {
+                if (sizeEl.options[s].value === (p.size || '')) {
+                    sizeEl.selectedIndex = s;
+                    szFound = true;
+                    break;
+                }
+            }
+            if (!szFound && p.size && sizeEl.options.length > 0) {
+                var opt = document.createElement('option');
+                opt.value = p.size;
+                opt.textContent = p.size;
+                sizeEl.appendChild(opt);
+                sizeEl.value = p.size;
+            }
+        }
+        if (stockEl) stockEl.value = getEffectiveStock(p);
+        if (expEl) expEl.value = p.expiration || '';
+
+        openModal('editProductModalOverlay');
+    }
+
+    var editSaveBtn = document.getElementById('editProductSaveBtn');
+    if (editSaveBtn) {
+        editSaveBtn.addEventListener('click', function () {
+            if (currentEditId == null) return;
+            var nameEl = document.getElementById('editProductName');
+            var priceEl = document.getElementById('editProductPrice');
+            var discountEl = document.getElementById('editProductDiscount');
+            var stockEl = document.getElementById('editProductStock');
+            var catEl = document.getElementById('editProductCategory');
+            var sizeEl = document.getElementById('editProductSize');
+            var skuEl = document.getElementById('editProductSku');
+            var alertEl = document.getElementById('editProductLowStock');
+            var expEl = document.getElementById('editProductExpiration');
+
+            var name = nameEl ? nameEl.value.trim() : '';
+            var price = priceEl ? Number(priceEl.value) : 0;
+            var stock = stockEl ? Number(stockEl.value) : 0;
+            var discount = discountEl ? Number(discountEl.value) : 0;
+            var category = catEl ? catEl.value : '';
+
+            if (!name) {
+                if (typeof showNotification === 'function') showNotification('Product name is required', 'error');
+                return;
+            }
+            if (isNaN(price) || price < 0) {
+                if (typeof showNotification === 'function') showNotification('Valid price is required', 'error');
+                return;
+            }
+            if (isNaN(stock) || stock < 0) {
+                if (typeof showNotification === 'function') showNotification('Valid stock is required', 'error');
+                return;
+            }
+            if (isNaN(discount) || discount < 0 || discount > 100) {
+                if (typeof showNotification === 'function') showNotification('Discount must be between 0 and 100', 'error');
+                return;
+            }
+
+            var fields = {
+                name: name,
+                category: category,
+                price: price,
+                discount: discount,
+                stock: stock,
+                size: sizeEl ? sizeEl.value : 'N/A',
+                sku: skuEl ? skuEl.value.trim() : '',
+                lowStockAlert: alertEl ? Number(alertEl.value) || 10 : 10,
+                expiration: expEl ? expEl.value : '',
+                updated: typeof getCurrentDateTime === 'function' ? getCurrentDateTime() : new Date().toLocaleString()
+            };
+
+            if (typeof updateProduct === 'function') {
+                updateProduct(currentEditId, fields);
+            } else {
+                var list = allProducts();
+                for (var fi = 0; fi < list.length; fi++) {
+                    if (String(list[fi].id) === String(currentEditId)) {
+                        for (var k in fields) {
+                            if (fields.hasOwnProperty(k)) list[fi][k] = fields[k];
+                        }
+                        break;
+                    }
+                }
+                if (typeof saveProducts === 'function') saveProducts(list);
+            }
+
+            if (typeof showNotification === 'function') {
+                showNotification('Product "' + name + '" updated successfully!', 'success');
+            }
+            closeModal('editProductModalOverlay');
+            currentEditId = null;
+            filterAndRender();
+        });
+    }
+    var currentDeleteId = null;
+    function openDeleteModal(p) {
+        currentDeleteId = p.id;
+        var delName = document.getElementById('deleteProductName');
+        var delSku = document.getElementById('deleteProductSku');
+        if (delName) delName.textContent = p.name || 'N/A';
+        if (delSku) delSku.textContent = generateSku(p);
+        openModal('deleteProductModalOverlay');
+    }
+
+    var delConfirmBtn = document.getElementById('deleteProductConfirmBtn');
+    if (delConfirmBtn) {
+        delConfirmBtn.addEventListener('click', function () {
+            if (currentDeleteId == null) return;
+            var p = getProductByIdSafe(currentDeleteId);
+            var pname = p ? p.name : '';
+
+            if (typeof deleteProduct === 'function') {
+                deleteProduct(currentDeleteId);
+            } else {
+                var list = allProducts();
+                var newList = [];
+                for (var i = 0; i < list.length; i++) {
+                    if (String(list[i].id) !== String(currentDeleteId)) {
+                        newList.push(list[i]);
+                    }
+                }
+                if (typeof saveProducts === 'function') saveProducts(newList);
+            }
+            if (typeof showNotification === 'function') {
+                showNotification('Product "' + pname + '" deleted successfully!', 'success');
+            }
+            closeModal('deleteProductModalOverlay');
+            currentDeleteId = null;
+            filterAndRender();
+        });
+    }
+    var currentAdjustId = null;
+    var adjustBtn = document.querySelector('.adjust-stock-btn');
+    if (adjustBtn) {
+        adjustBtn.addEventListener('click', function () {
+            var firstRow = document.querySelector('.inventory-table tbody tr');
+            if (!firstRow) {
+                if (typeof showNotification === 'function') showNotification('No products to adjust', 'error');
+                return;
+            }
+            var id = firstRow.getAttribute('data-product-id');
+            var p = getProductByIdSafe(id);
+            if (p) openAdjustModal(p);
+        });
+    }
+
+    function openAdjustModal(p) {
+        currentAdjustId = p.id;
+        var nameEl = document.getElementById('adjustStockProductName');
+        if (nameEl) nameEl.value = p.name || '';
+        var typeEl = document.getElementById('adjustStockType');
+        if (typeEl) typeEl.value = '+';
+        var qtyEl = document.getElementById('adjustStockQuantity');
+        if (qtyEl) qtyEl.value = '';
+        openModal('adjustStockModalOverlay');
+    }
+
+    var adjustSaveBtn = document.getElementById('adjustStockSaveBtn');
+    if (adjustSaveBtn) {
+        adjustSaveBtn.addEventListener('click', function () {
+            if (currentAdjustId == null) return;
+            var typeEl = document.getElementById('adjustStockType');
+            var qtyEl = document.getElementById('adjustStockQuantity');
+            var op = typeEl ? typeEl.value : '+';
+            var qty = qtyEl ? Number(qtyEl.value) : 0;
+
+            if (isNaN(qty) || qty <= 0) {
+                if (typeof showNotification === 'function') showNotification('Enter a valid quantity', 'error');
+                return;
+            }
+
+            var p = getProductByIdSafe(currentAdjustId);
+            if (!p) return;
+            var cur = Number(p.stock) || 0;
+            var newStock = op === '+' ? cur + qty : cur - qty;
+            if (newStock < 0) newStock = 0;
+
+            if (typeof updateProduct === 'function') {
+                updateProduct(currentAdjustId, {
+                    stock: newStock,
+                    updated: typeof getCurrentDateTime === 'function' ? getCurrentDateTime() : new Date().toLocaleString()
+                });
+            } else {
+                var list = allProducts();
+                for (var i = 0; i < list.length; i++) {
+                    if (String(list[i].id) === String(currentAdjustId)) {
+                        list[i].stock = newStock;
+                        break;
+                    }
+                }
+                if (typeof saveProducts === 'function') saveProducts(list);
+            }
+
+            if (typeof showNotification === 'function') {
+                var word = op === '+' ? 'added to' : 'removed from';
+                showNotification('Stock ' + word + ' "' + p.name + '" successfully!', 'success');
+            }
+            closeModal('adjustStockModalOverlay');
+            currentAdjustId = null;
+            filterAndRender();
+        });
+    }
+
+    var searchInput = document.querySelector('.inventory-search-filters .search-input');
+    if (searchInput) searchInput.addEventListener('input', filterAndRender);
+
+    var filterSelects = document.querySelectorAll('.inventory-search-filters .filter-select');
+    filterSelects.forEach(function (sel) {
+        sel.addEventListener('change', filterAndRender);
+    });
+    var initialRender = typeof nbDataReady !== 'undefined'
+        ? nbDataReady.catch(function () { })
+        : Promise.resolve();
+    initialRender.then(function () {
+        renderInventoryTable(allProducts());
+    });
+
 });

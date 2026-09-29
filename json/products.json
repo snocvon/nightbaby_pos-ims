@@ -1,0 +1,194 @@
+[
+  {
+    "id": 9283746501,
+    "name": "ARACHNE Striped Distressed Co-Ord Set",
+    "category": "clothing",
+    "subcategory": "Outfit Sets",
+    "price": 1150.00,
+    "stock": 150,
+    "image": "images/PRODUCTS/nightbaby ARACHNE Striped Distressed Co-Ord Set(6).jpg"
+  },
+  {
+    "id": 9283746502,
+    "name": "CRIMSON ECLIPSE Lace Trimmed Co-Ord Set",
+    "category": "clothing",
+    "subcategory": "Outfit Sets",
+    "price": 980.00,
+    "stock": 150,
+    "image": "images/PRODUCTS/nightbaby CRIMSON ECLIPSE Lace Trimmed Co-Ord Set(3).jpg"
+  },
+  {
+    "id": 9283746503,
+    "name": "MISFITS Distressed Bleach-Splatter Co-Ord Set",
+    "category": "clothing",
+    "subcategory": "Outfit Sets",
+    "price": 1350.00,
+    "stock": 150,
+    "image": ""
+  },
+  {
+    "id": 9283746504,
+    "name": "CELESTIAL DISTORTION Lace & Safety Pin Skirt",
+    "category": "clothing",
+    "subcategory": "Skirts",
+    "price": 680.00,
+    "stock": 120,
+    "image": "images/PRODUCTS/nightbaby CELESTIAL DISTORTION Lace & Safety Pin Skirt.jpg"
+  },
+  {
+    "id": 9283746505,
+    "name": "NOCTURNE Cinched Bell-Sleeve Top",
+    "category": "clothing",
+    "subcategory": "Tops",
+    "price": 550.00,
+    "stock": 100,
+    "image": "images/PRODUCTS/nightbaby NOCTURNE Cinched Bell-Sleeve Top.jpg"
+  },
+  {
+    "id": 9283746506,
+    "name": "VEIL OF SHADOWS High-Neck Flare-Sleeve Blouse",
+    "category": "clothing",
+    "subcategory": "Tops",
+    "price": 520.00,
+    "stock": 100,
+    "image": "images/PRODUCTS/nightbaby VEIL OF SHADOWS High-Neck Flare-Sleeve.jpg"
+  },
+  {
+    "id": 9283746507,
+    "name": "CHRONICLE Newspaper Print Patchwork Sweatshirt",
+    "category": "clothing",
+    "subcategory": "Sweatshirts",
+    "price": 720.00,
+    "stock": 80,
+    "image": "images/PRODUCTS/nightbaby CHRONICLE Newspaper Print Patchwork(1).jpg"
+  },
+  {
+    "id": 9283746508,
+    "name": "VOID LEOPARD Faux Fur Hooded Jacket",
+    "category": "clothing",
+    "subcategory": "Jackets & Coats",
+    "price": 1280.00,
+    "stock": 50,
+    "image": "images/PRODUCTS/nightbaby VOID LEOPARD Faux Fur Hooded Jacket.jpg"
+  },
+  {
+    "id": 9283746509,
+    "name": "ASYLUM Asymmetrical Zip High-Collar Jacket",
+    "category": "clothing",
+    "subcategory": "Jackets & Coats",
+    "price": 890.00,
+    "stock": 60,
+    "image": "images/PRODUCTS/nightbaby ASYLUM Asymmetrical Zip High-Collar Jacket.jpg"
+  },
+  {
+    "id": 9283746510,
+    "name": "GHOST SERIES Graphic Tee",
+    "category": "clothing",
+    "subcategory": "Graphic T-Shirts",
+    "price": 580.00,
+    "stock": 150,
+    "image": "images/PRODUCTS/nightbaby GHOST SERIES TEE.png"
+  },
+
+  {
+    "id": 9283746511,
+    "name": "MOURNING BLOOM",
+    "category": "perfume",
+    "subcategory": "Eau de Parfum",
+    "price": 850.00,
+    "stock": 60,
+    "image": "images/PRODUCTS/parfume.png"
+  },
+  {
+    "id": 9283746512,
+    "name": "VIOLET AFTERBURN",
+    "category": "perfume",
+    "subcategory": "Eau de Parfum",
+    "price": 550.00,
+    "stock": 75,
+    "image": "images/PRODUCTS/parfume.png"
+  },
+  {
+    "id": 9283746513,
+    "name": " RESIN REAPER",
+    "category": "perfume",
+    "subcategory": "Eau de Parfum",
+    "price": 380.00,
+    "stock": 90,
+    "image": "images/PRODUCTS/parfume.png"
+  },
+  {
+    "id": 9283746514,
+    "name": "OAKMOSS SÉANCE",
+    "category": "perfume",
+    "subcategory": "Eau de Parfum",
+    "price": 950.00,
+    "stock": 40,
+    "image": "images/PRODUCTS/parfume.png"
+  },
+
+  {
+    "id": 9283746515,
+    "name": "CHAIN Wallet - Black",
+    "category": "accessories",
+    "subcategory": "Wallets",
+    "price": 350.00,
+    "stock": 120,
+    "image": "images/products/accessories/chain-wallet.jpg"
+  },
+  {
+    "id": 9283746516,
+    "name": "SKULL Ring - Silver",
+    "category": "accessories",
+    "subcategory": "Jewelry",
+    "price": 280.00,
+    "stock": 150,
+    "image": "images/products/accessories/skull-ring.jpg"
+  },
+  {
+    "id": 9283746517,
+    "name": "GOTHIC Choker",
+    "category": "accessories",
+    "subcategory": "Necklaces",
+    "price": 220.00,
+    "stock": 100,
+    "image": "images/products/accessories/gothic-choker.jpg"
+  },
+  {
+    "id": 9283746518,
+    "name": "LEATHER Bracelet - Studded",
+    "category": "accessories",
+    "subcategory": "Bracelets",
+    "price": 180.00,
+    "stock": 130,
+    "image": "images/products/accessories/leather-bracelet.jpg"
+  },
+
+  {
+    "id": 9283746519,
+    "name": "Perfume Recreate Service",
+    "category": "services",
+    "subcategory": "Perfume Recreate",
+    "price": 500.00,
+    "stock": 9999,
+    "image": "images/PRODUCTS/remake.jpg"
+  },
+  {
+    "id": 9283746520,
+    "name": "Tailoring Service",
+    "category": "services",
+    "subcategory": "Tailoring",
+    "price": 300.00,
+    "stock": 9999,
+    "image": "images/PRODUCTS/taylor.jpg"
+  },
+  {
+    "id": 9283746521,
+    "name": "Custom Made Service",
+    "category": "services",
+    "subcategory": "Custom Made",
+    "price": 1000.00,
+    "stock": 9999,
+    "image": "images/PRODUCTS/custom.jpg"
+  }
+]

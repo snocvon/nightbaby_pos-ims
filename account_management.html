@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nightbaby | Account Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/ico" href="images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-page">
+        <div class="dashboard-container">
+            <aside class="dashboard-sidebar">
+                <div class="sidebar-logo">
+                    <img src="images/logo.png" alt="nightbaby" class="sidebar-logo-img">
+                </div>
+
+                <div class="sidebar-user">
+                    <button class="user-role-btn" id="userRoleBtn">
+                        <img class="sideNavIcon" src="sources/icons/user-svgrepo-com(1).png" alt="home-icon" width="20" height="20">
+                        <span>SuperUser</span>
+                    </button>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="account_management.html" class="sidebar-link" data-page="dashboard">
+                        <img class="sideNavIcon" src="sources/icons/user-svgrepo-com.png" alt="home-icon" width="25" height="25">
+                        <span>User Management</span>
+                    </a>
+                    <a href="system_management.html" class="sidebar-link active" data-page="pos">
+                        <img class="sideNavIcon" src="sources/icons/settings-svgrepo-com.png" alt="home-icon" width="25" height="25">
+                        <span>System Settings</span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <a href="login.html" class="sidebar-link logout">
+                        <img class="sideNavIcon" src="sources/icons/logout-svgrepo-com.png" alt="home-icon" width="25" height="25">
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </aside>
+<!-- dito muna -->
+            <main class="dashboard-main">
+                <div class="dashboard-topbar">
+                    <div class="topbar-left">
+                        <div class="page-header">
+                            <img class="sideNavIcon" src="sources/icons/user-svgrepo-com(1).png" alt="home-icon" width="30" height="30">
+                            <h1 class="page-title" id="pageTitle">User Management</h1>
+                        </div>
+                    </div>
+                    <div class="topbar-right">
+                        <div class="topbar-datetime">
+                            <span class="datetime-day" id="currentDay">Saturday</span>
+                            <span class="datetime-date" id="currentDate">August 1, 2026</span>
+                            <span class="datetime-time" id="currentTime">3:45 PM</span>
+                        </div>
+                        <span class="admin-name" id="topbarAdminName">Admin</span>
+                        <div class="admin-avatar">
+                            <img src="sources/icons/user-svgrepo-com.png" alt="user-mainlogo" width="20" height="20">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-management-section dashboard-card" aria-labelledby="usersTableTitle">
+                    <div class="section-header panel-header">
+                        <div class="section-title-wrap">
+                            <h2 id="usersTableTitle">User Management</h2>
+                        </div>
+                        <button type="button" class="primary-btn" id="addUserButton" aria-label="Add user">+ Add User</button>
+                    </div>
+
+                    <div class="alert-table-wrapper">
+                        <table class="alert-table user-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Role</th>
+                                    <th scope="col" aria-label="Actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="account-modal-overlay" id="userModal" hidden>
+                    <section class="account-modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+                        <div class="account-modal-header">
+                            <h2 id="userModalTitle">Add User</h2>
+                            <button type="button" class="pos-modal-close" id="closeUserModal" aria-label="Close">&times;</button>
+                        </div>
+                        <form id="userForm" class="account-form" autocomplete="off">
+                            <input type="hidden" id="editingUsername">
+                            <div class="form-group">
+                                <label for="userUsername">Username</label>
+                                <input type="text" id="userUsername" required autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="accountHolderName">Account Holder Name</label>
+                                <input type="text" id="accountHolderName" required autocomplete="name" placeholder="Enter full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="userRole">Role</label>
+                                <select id="userRole" required>
+                                    <option value="cashier">Cashier</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="it">Super User</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="userPassword">Password</label>
+                                <input type="password" id="userPassword" autocomplete="new-password">
+                                <small id="passwordHint">Required when creating a new account.</small>
+                            </div>
+                            <p class="account-form-error" id="userFormError" role="alert"></p>
+                            <div class="account-modal-footer">
+                                <button type="button" class="modal-btn-cancel" id="cancelUserModal">Cancel</button>
+                                <button type="submit" class="modal-btn-confirm">Save User</button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+
+                <footer class="dashboard-footer">
+                    <p>nightbaby™ @2026 | LLC Registered</p>
+                </footer>
+            </main>
+
+    </div>
+
+    <script src="js/global.js"></script>
+    <script src="js/account_management.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer display | nightbaby</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="customer-display-page">
+    <main class="customer-display" id="customerDisplay">
+        <section class="customer-checkout" id="customerCheckout" hidden>
+            <header class="customer-header">
+                <div>
+                    <p class="customer-kicker">Your order</p>
+                    <br>
+                    <img id="checkoutStoreName" class="customer-checkout-logo" src="images/var2_white.png" alt="nightbaby">
+                </div>
+                <span class="customer-item-count" id="customerItemCount">0 items</span>
+            </header>
+            <div class="customer-order-body">
+                <div class="customer-items" id="customerItems"></div>
+                <aside class="customer-summary">
+                    <div class="customer-summary-row"><span>Subtotal</span><strong id="customerSubtotal">-</strong></div>
+                    <div class="customer-summary-row discount-row"><span>Discounts</span><strong id="customerDiscount">-</strong></div>
+                    <div class="customer-summary-row"><span>VAT</span><strong id="customerTax">-</strong></div>
+                    <div class="customer-total-row"><span>Total</span><strong id="customerTotal">-</strong></div>
+                    <p class="customer-thanks">Thank you for shopping with us.</p>
+                </aside>
+            </div>
+        </section>
+
+        <section class="customer-ads" id="customerAds" hidden>
+            <header class="customer-welcome" id="customerWelcome">
+                <p class="customer-kicker">Welcome to</p>
+                <br>
+                <img id="customerStoreName" class="customer-logo" src="images/logo.png" alt="nightbaby">
+                <p class="customer-welcome-copy">Your order will appear here as it is scanned.</p>
+            </header>
+            <div class="customer-ad-panel">
+                <div class="customer-ad-content">
+                    <p class="customer-kicker">Featured</p>
+                    <h1 id="customerAdTitle">ABOUT NIGHTBABY ORIGINALS</h1>
+                    <p id="customerAdCopy">Nightbaby Originals is a fashion collection inspired by creativity, individuality, and self-expression.</p>
+                    <span class="customer-ad-progress" id="customerAdProgress">01 / 01</span>
+                </div>
+                <div class="customer-ad-image-wrap">
+                    <img id="customerAdImage" src="images/PRODUCTS/ORIGS.png" alt="Featured product">
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <script src="js/global.js"></script>
+    <script src="js/customer.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nightbaby | System Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/ico" href="images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-page">
+        <div class="dashboard-container">
+            <aside class="dashboard-sidebar">
+                <div class="sidebar-logo">
+                    <img src="images/logo.png" alt="nightbaby" class="sidebar-logo-img">
+                </div>
+
+                <div class="sidebar-user">
+                    <button class="user-role-btn" id="userRoleBtn">
+                        <img class="sideNavIcon" src="sources/icons/user-svgrepo-com(1).png" alt="home-icon" width="20" height="20">
+                        <span>SuperUser</span>
+                    </button>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="account_management.html" class="sidebar-link" data-page="dashboard">
+                        <img class="sideNavIcon" src="sources/icons/user-svgrepo-com.png" alt="home-icon" width="25" height="25">
+                        <span>User Management</span>
+                    </a>
+                    <a href="system_management.html" class="sidebar-link active" data-page="pos">
+                        <img class="sideNavIcon" src="sources/icons/settings-svgrepo-com.png" alt="home-icon" width="25" height="25">
+                        <span>System Settings</span>
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <a href="login.html" class="sidebar-link logout">
+                        <img class="sideNavIcon" src="sources/icons/logout-svgrepo-com.png" alt="home-icon" width="25" height="25">
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </aside>
+
+            <main class="dashboard-main">
+                <div class="dashboard-topbar">
+                    <div class="topbar-left">
+                        <div class="page-header">
+                            <img src="sources/icons/settings-svgrepo-com (3).png" alt="" width="30" height="30">
+                            <h1 class="page-title" id="pageTitle">System Settings</h1>
+                        </div>
+                    </div>
+                    <div class="topbar-right">
+                        <div class="topbar-datetime">
+                            <span class="datetime-day" id="currentDay">Saturday</span>
+                            <span class="datetime-date" id="currentDate">August 1, 2026</span>
+                            <span class="datetime-time" id="currentTime">3:45 PM</span>
+                        </div>
+                        <span class="admin-name" id="topbarAdminName">Admin</span>
+                        <div class="admin-avatar">
+                            <img src="sources/icons/user-svgrepo-com.png" alt="user-mainlogo" width="20" height="20">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="system-settings-content">
+                    <section class="dashboard-card system-controls-card">
+                        <div class="section-header panel-header maintenance-header"><div><span class="section-kicker">System Controls</span><h2>Maintenance</h2></div></div>
+                        <div class="system-control-list">
+                            <button type="button" class="system-control-btn" id="backupSystemBtn"><span><strong>Backup System</strong><small>Download products, users, settings, and transactions as a text file.</small></span><span>Download TXT</span></button>
+                            <button type="button" class="system-control-btn danger" id="resetSystemDataBtn"><span><strong>System Reset</strong><small>Restore application data to its original defaults.</small></span><span>Reset Data</span></button>
+                            <label class="system-toggle"><span><strong>System Down</strong><small>Block Admin and Cashier access for maintenance.</small></span><input type="checkbox" id="systemDownToggle"><span class="toggle-slider"></span></label>
+                        </div>
+                    </section>
+                </div>
+
+                <footer class="dashboard-footer">
+                    <span>nightbaby™ @2026 | LLC Registered</span>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/global.js"></script>
+    <script src="js/system_management.js"></script>
+</body>
+</html>

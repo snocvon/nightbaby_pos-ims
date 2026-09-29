@@ -1,0 +1,28 @@
+{
+    "7days": {
+        "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        "values": [3500, 4200, 5100, 4800, 7300, 6500, 9200]
+    },
+
+    "30days": {
+        "labels": ["Week 1", "Week 2", "Week 3", "Week 4"],
+        "values": [25500, 30100, 28700, 41200]
+    },
+
+    "month": {
+        "labels": ["Week 1", "Week 2", "Week 3", "Week 4"],
+        "values": [25500, 30100, 28700, 41200]
+    },
+
+    "year": {
+        "labels": [
+            "Jan", "Feb", "Mar", "Apr",
+            "May", "Jun", "Jul", "Aug",
+            "Sep", "Oct", "Nov", "Dec"
+        ],
+        "values": [
+            42000, 51000, 48000, 62000,
+            57000, 68000, 72000, 75000
+        ]
+    }
+}
