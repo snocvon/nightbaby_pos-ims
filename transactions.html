@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nightbaby · Transactions</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/ico" href="images/favicon.ico" />
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet"
+    />
+</head>
+<body>
+    <!-- ===== TRANSACTIONS PAGE ===== -->
+    <div class="dashboard-page">
+        <!-- ===== DASHBOARD CONTAINER ===== -->
+        <div class="dashboard-container">
+            <!-- ===== LEFT SIDEBAR ===== -->
+            <aside class="dashboard-sidebar">
+                <div class="sidebar-logo">
+                    <img
+                        src="images/logo.png"
+                        alt="nightbaby"
+                        class="sidebar-logo-img"
+                    />
+                </div>
+
+                <div class="sidebar-user">
+                    <button class="user-role-btn" id="userRoleBtn">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        <span id="userRoleText">Admin</span>
+                    </button>
+                </div>
+
+              <nav class="sidebar-nav">
+    <a href="home.html" class="sidebar-link" data-page="dashboard">
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+        >
+            <path
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+            />
+        </svg>
+        <span>Dashboard</span>
+    </a>
+    <a href="pos.html" class="sidebar-link" data-page="pos">
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+        >
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+        </svg>
+        <span>Point of Sale</span>
+    </a>
+
+    <!-- Transactions with Sub-items -->
+    <div class="sidebar-nav-group">
+        <a href="transactions.html" class="sidebar-link active" data-page="transactions">
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+            </svg>
+            <span>Transactions</span>
+        </a>
+        <!-- Sub-nav items -->
+        <div class="sub-nav-items">
+            <a href="inventory.html" class="sub-sidebar-link" data-subpage="inventory">
+                <span class="sub-bullet">▸</span>
+                <span>Inventory</span>
+            </a>
+            <a href="#" class="sub-sidebar-link" data-subpage="reports">
+                <span class="sub-bullet">▸</span>
+                <span>Reports</span>
+            </a>
+            <a href="#" class="sub-sidebar-link" data-subpage="discounts">
+                <span class="sub-bullet">▸</span>
+                <span>Discounts</span>
+            </a>
+            <a href="#" class="sub-sidebar-link" data-subpage="staffs">
+                <span class="sub-bullet">▸</span>
+                <span>Staffs</span>
+            </a>
+        </div>
+    </div>
+</nav>
+                <div class="sidebar-footer">
+                    <a href="login.html" class="sidebar-link logout">
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </aside>
+
+            <!-- ===== MAIN CONTENT ===== -->
+            <main class="dashboard-main transactions-main">
+                <!-- ===== TOP BAR ===== -->
+                <div class="dashboard-topbar">
+                    <div class="topbar-left">
+                        <div class="page-header">
+                            <svg
+                                class="page-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                                />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <polyline points="10 9 9 9 8 9" />
+                            </svg>
+                            <h1 class="page-title" id="pageTitle">Transactions</h1>
+                        </div>
+                    </div>
+                    <div class="topbar-right">
+                        <div class="topbar-datetime">
+                            <span class="datetime-day" id="currentDay">Saturday</span>
+                            <span class="datetime-date" id="currentDate">August 1, 2026</span>
+                            <span class="datetime-time" id="currentTime">3:45 PM</span>
+                        </div>
+                        <span class="admin-name" id="topbarAdminName">Admin</span>
+                        <div class="admin-avatar">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== TRANSACTIONS CONTENT ===== -->
+                <div class="transactions-content">
+                    <!-- ===== STATS ROW ===== -->
+                    <div class="transactions-stats">
+                        <!-- Total Transactions -->
+                        <div class="trans-stat-card">
+                            <div class="trans-stat-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                                </svg>
+                            </div>
+                            <div class="trans-stat-content">
+                                <span class="trans-stat-value">35</span>
+                                <span class="trans-stat-label">Total Transactions</span>
+                            </div>
+                        </div>
+
+                        <!-- Total Sales -->
+                        <div class="trans-stat-card">
+                            <div class="trans-stat-icon sales-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 2v10l6 4" />
+                                    <path d="M12 2a10 10 0 0 1 8.66 14.4" />
+                                </svg>
+                            </div>
+                            <div class="trans-stat-content">
+                                <span class="trans-stat-value">₱4,280.00</span>
+                                <span class="trans-stat-label">Total Sales</span>
+                            </div>
+                        </div>
+
+                        <!-- Items Sold -->
+                        <div class="trans-stat-card">
+                            <div class="trans-stat-icon items-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <rect x="4" y="10" width="4" height="10" rx="1" />
+                                    <rect x="10" y="6" width="4" height="14" rx="1" />
+                                    <rect x="16" y="2" width="4" height="18" rx="1" />
+                                </svg>
+                            </div>
+                            <div class="trans-stat-content">
+                                <span class="trans-stat-value">87</span>
+                                <span class="trans-stat-label">Items Sold</span>
+                            </div>
+                        </div>
+
+                        <!-- Total Refunds -->
+                        <div class="trans-stat-card">
+                            <div class="trans-stat-icon refund-icon">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"
+                                    />
+                                </svg>
+                            </div>
+                            <div class="trans-stat-content">
+                                <span class="trans-stat-value">2</span>
+                                <span class="trans-stat-label">Total Refunds</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== FILTERS ROW ===== -->
+                    <div class="transactions-filters">
+                        <div class="filter-group">
+                            <label>Type</label>
+                            <select class="filter-select">
+                                <option>All Types</option>
+                                <option>Purchase</option>
+                                <option>Bespoke</option>
+                                <option>Repair</option>
+                                <option>Consultation</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Status</label>
+                            <select class="filter-select">
+                                <option>All Status</option>
+                                <option>Completed</option>
+                                <option>In Production</option>
+                                <option>Ready for Pickup</option>
+                                <option>Refunded</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Date</label>
+                            <select class="filter-select">
+                                <option>This Week</option>
+                                <option>This Month</option>
+                                <option>This Year</option>
+                                <option>Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="filter-group search-group">
+                            <div class="search-container">
+                                <div class="search-icon-wrapper">
+                                    <svg
+                                        class="search-icon"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <circle cx="11" cy="11" r="8" />
+                                        <path d="M21 21l-4.35-4.35" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    class="search-input"
+                                    placeholder="Search transactions..."
+                                />
+                            </div>
+                        </div>
+                        <!-- ===== Action Buttons ===== -->
+                        <div class="filter-group action-buttons-group">
+                            <label>&nbsp;</label>
+                            <div class="action-buttons">
+                                <button class="action-btn-icon refresh-btn" title="Refresh">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path d="M23 4v6h-6" />
+                                        <path d="M1 20v-6h6" />
+                                        <path
+                                            d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                                        />
+                                    </svg>
+                                </button>
+                                <button class="action-btn-icon export-btn" title="Export PDF">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                                        />
+                                        <polyline points="14 2 14 8 20 8" />
+                                        <line x1="16" y1="13" x2="8" y2="13" />
+                                        <line x1="16" y1="17" x2="8" y2="17" />
+                                        <polyline points="10 9 9 9 8 9" />
+                                    </svg>
+                                    Export PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== TRANSACTION TABLE ===== -->
+                    <div class="transactions-table-wrapper">
+                        <table class="transactions-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date & Time</th>
+                                    <th>Customer</th>
+                                    <th>Type</th>
+                                    <th>Cashier</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="trans-id">#TRX-0035</td>
+                                    <td>Aug 17, 2026<br />02:41 PM</td>
+                                    <td>Walk-in Customer</td>
+                                    <td><span class="type-badge purchase">Purchase</span></td>
+                                    <td>Cashier 1</td>
+                                    <td>3</td>
+                                    <td>₱400.00</td>
+                                    <td>
+                                        <span class="status-badge completed">Completed</span>
+                                    </td>
+                                    <td><button class="action-btn">•••</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="trans-id">#TRX-0034</td>
+                                    <td>Aug 17, 2026<br />02:41 PM</td>
+                                    <td>Juan Reyes</td>
+                                    <td><span class="type-badge bespoke">Bespoke</span></td>
+                                    <td>Admin</td>
+                                    <td>2</td>
+                                    <td>₱1,500.00</td>
+                                    <td>
+                                        <span class="status-badge in-production">In Production</span>
+                                    </td>
+                                    <td><button class="action-btn">•••</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="trans-id">#TRX-0033</td>
+                                    <td>Aug 17, 2026<br />02:41 PM</td>
+                                    <td>Joanna Leir</td>
+                                    <td><span class="type-badge bespoke">Bespoke</span></td>
+                                    <td>Cashier 1</td>
+                                    <td>1</td>
+                                    <td>₱800.00</td>
+                                    <td>
+                                        <span class="status-badge ready">Ready for Pickup</span>
+                                    </td>
+                                    <td><button class="action-btn">•••</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="trans-id">#TRX-0032</td>
+                                    <td>Aug 17, 2026<br />02:41 PM</td>
+                                    <td>Walk-in Customer</td>
+                                    <td><span class="type-badge repair">Repair</span></td>
+                                    <td>Cashier 2</td>
+                                    <td>3</td>
+                                    <td>₱2,400.00</td>
+                                    <td>
+                                        <span class="status-badge completed">Completed</span>
+                                    </td>
+                                    <td><button class="action-btn">•••</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="trans-id">#TRX-0031</td>
+                                    <td>Aug 17, 2026<br />02:41 PM</td>
+                                    <td>Victoria Belle</td>
+                                    <td>
+                                        <span class="type-badge consultation">Consultation</span>
+                                    </td>
+                                    <td>Admin</td>
+                                    <td>2</td>
+                                    <td>₱500.00</td>
+                                    <td>
+                                        <span class="status-badge completed">Completed</span>
+                                    </td>
+                                    <td><button class="action-btn">•••</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="trans-id">#TRX-0030</td>
+                                    <td>Aug 17, 2026<br />02:41 PM</td>
+                                    <td>Walk-in Customer</td>
+                                    <td><span class="type-badge purchase">Purchase</span></td>
+                                    <td>Cashier 1</td>
+                                    <td>3</td>
+                                    <td>₱3,000.00</td>
+                                    <td><span class="status-badge refunded">Refunded</span></td>
+                                    <td><button class="action-btn">•••</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ===== PAGINATION ===== -->
+                    <div class="transactions-pagination">
+                        <span class="pagination-info">Showing 1–6 of 35 transactions</span>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn prev-btn">‹</button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn">2</button>
+                            <button class="pagination-btn">3</button>
+                            <button class="pagination-btn">4</button>
+                            <button class="pagination-btn">5</button>
+                            <button class="pagination-btn next-btn">›</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== FOOTER ===== -->
+                <footer class="dashboard-footer">
+                    <span>2026 nightbaby</span>
+                    <span>Clothing and Perfume</span>
+                    <span class="footer-date" id="footerDate">Saturday, August 1, 2026</span>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/global.js"></script>
+    <script src="js/transactions.js"></script>
+</body>
+</html>

@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nightbaby · Dashboard</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/ico" href="images/favicon.ico" />
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <div class="dashboard-page">
+      <!-- ===== DASHBOARD CONTAINER ===== -->
+      <div class="dashboard-container">
+        <!-- ===== LEFT SIDEBAR ===== -->
+        <aside class="dashboard-sidebar">
+          <!-- Logo at top of sidebar -->
+          <div class="sidebar-logo">
+            <img
+              src="images/logo.png"
+              alt="nightbaby"
+              class="sidebar-logo-img"
+            />
+          </div>
+
+          <!-- User Role Button -->
+          <div class="sidebar-user">
+            <button class="user-role-btn" id="userRoleBtn">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span id="userRoleText">Admin</span>
+            </button>
+          </div>
+
+          <nav class="sidebar-nav">
+            <a
+              href="home.html"
+              class="sidebar-link active"
+              data-page="dashboard"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              <span>Dashboard</span>
+            </a>
+            <a href="pos.html" class="sidebar-link" data-page="pos">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg>
+              <span>Point of Sale</span>
+            </a>
+            <a
+              href="transactions.html"
+              class="sidebar-link"
+              data-page="transactions"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+              <span>Transactions</span>
+            </a>
+          </nav>
+          <div class="sidebar-footer">
+            <a href="login.html" class="sidebar-link logout">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span>Logout</span>
+            </a>
+          </div>
+        </aside>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <main class="dashboard-main">
+          <!-- ===== TOP BAR (Page Header) ===== -->
+          <div class="dashboard-topbar">
+            <div class="topbar-left">
+              <div class="page-header">
+                <svg
+                  class="page-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
+                <h1 class="page-title" id="pageTitle">Dashboard</h1>
+              </div>
+            </div>
+            <div class="topbar-right">
+              <div class="topbar-datetime">
+                <span class="datetime-day" id="currentDay">Saturday</span>
+                <span class="datetime-date" id="currentDate"
+                  >August 1, 2026</span
+                >
+                <span class="datetime-time" id="currentTime">3:45 PM</span>
+              </div>
+              <span class="admin-name" id="topbarAdminName">Admin</span>
+              <div class="admin-avatar">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== TOP ROW: 2x2 Cards + Top Products ===== -->
+          <div class="dashboard-top-row">
+            <!-- Left: 4 Cards (2x2 Grid) -->
+            <div class="dashboard-col-left">
+              <!-- Card 1: Total Sales -->
+              <div class="dashboard-card stat-card">
+                <div class="stat-card-icon sales-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M12 2v4M12 22v-4M4 12H2M22 12h-2M19.07 4.93l-2.83 2.83M4.93 19.07l2.83-2.83M19.07 19.07l-2.83-2.83M4.93 4.93l2.83 2.83"
+                    />
+                  </svg>
+                </div>
+                <div class="stat-card-content">
+                  <span class="stat-card-label">Total Sales</span>
+                  <span class="stat-card-value">₱45,280</span>
+                  <span class="stat-card-change positive">+12.5%</span>
+                </div>
+              </div>
+
+              <!-- Card 2: Total Orders -->
+              <div class="dashboard-card stat-card">
+                <div class="stat-card-icon orders-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                  </svg>
+                </div>
+                <div class="stat-card-content">
+                  <span class="stat-card-label">Total Orders</span>
+                  <span class="stat-card-value">284</span>
+                  <span class="stat-card-change positive">+8.3%</span>
+                </div>
+              </div>
+
+              <!-- Card 3: Low Stock -->
+              <div class="dashboard-card stat-card">
+                <div class="stat-card-icon stock-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="4" y="10" width="4" height="10" rx="1" />
+                    <rect x="10" y="6" width="4" height="14" rx="1" />
+                    <rect x="16" y="2" width="4" height="18" rx="1" />
+                  </svg>
+                </div>
+                <div class="stat-card-content">
+                  <span class="stat-card-label">Low Stock Items</span>
+                  <span class="stat-card-value">12</span>
+                  <span class="stat-card-change negative">+3 this week</span>
+                </div>
+              </div>
+
+              <!-- Card 4: Revenue -->
+              <div class="dashboard-card stat-card">
+                <div class="stat-card-icon revenue-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 2v10l6 4" />
+                    <path d="M12 2a10 10 0 0 1 8.66 14.4" />
+                  </svg>
+                </div>
+                <div class="stat-card-content">
+                  <span class="stat-card-label">Revenue</span>
+                  <span class="stat-card-value">₱12,800</span>
+                  <span class="stat-card-change positive">+22.1%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Top Products -->
+            <div class="dashboard-col-right-top">
+              <div class="dashboard-card top-products">
+                <div class="card-header">
+                  <h3>TOP PRODUCTS</h3>
+                </div>
+                <div class="product-list">
+                  <div class="product-item">
+                    <span class="product-rank">1</span>
+                    <span class="product-name">GRAPHIC SHIRT</span>
+                    <span class="product-sales">₱12,450</span>
+                  </div>
+                  <div class="product-item">
+                    <span class="product-rank">2</span>
+                    <span class="product-name">MINI SKIRT</span>
+                    <span class="product-sales">₱8,920</span>
+                  </div>
+                  <div class="product-item">
+                    <span class="product-rank">3</span>
+                    <span class="product-name">RAVEN NOIR</span>
+                    <span class="product-sales">₱6,780</span>
+                  </div>
+                  <div class="product-item">
+                    <span class="product-rank">4</span>
+                    <span class="product-name">LEATHER JACKET</span>
+                    <span class="product-sales">₱4,560</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== BOTTOM ROW: Revenue Line Graph ===== -->
+          <div class="dashboard-bottom-row">
+            <div class="dashboard-card graph-card">
+              <div class="card-header">
+                <h3>Revenue Overview</h3>
+                <span class="card-badge">Last 7 days</span>
+              </div>
+              <div class="line-chart-container">
+                <svg
+                  class="line-chart"
+                  viewBox="0 0 500 200"
+                  preserveAspectRatio="none"
+                >
+                  <defs>
+                    <!-- Gradient for the area under the curve -->
+                    <linearGradient
+                      id="areaGradient"
+                      x1="0%"
+                      y1="0%"
+                      x2="0%"
+                      y2="100%"
+                    >
+                      <stop
+                        offset="0%"
+                        style="stop-color: #e63946; stop-opacity: 0.35"
+                      />
+                      <stop
+                        offset="40%"
+                        style="stop-color: #e63946; stop-opacity: 0.15"
+                      />
+                      <stop
+                        offset="100%"
+                        style="stop-color: #e63946; stop-opacity: 0"
+                      />
+                    </linearGradient>
+
+                    <!-- Glow filter for data points -->
+                    <filter
+                      id="glow"
+                      x="-50%"
+                      y="-50%"
+                      width="200%"
+                      height="200%"
+                    >
+                      <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                      <feMerge>
+                        <feMergeNode in="coloredBlur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+
+                    <!-- Shadow filter for the line -->
+                    <filter
+                      id="lineShadow"
+                      x="-10%"
+                      y="-10%"
+                      width="120%"
+                      height="120%"
+                    >
+                      <feDropShadow
+                        dx="0"
+                        dy="2"
+                        stdDeviation="3"
+                        flood-color="#e63946"
+                        flood-opacity="0.3"
+                      />
+                    </filter>
+                  </defs>
+
+                  <!-- Grid Lines - Horizontal (more visible) -->
+                  <line
+                    x1="0"
+                    y1="40"
+                    x2="500"
+                    y2="40"
+                    stroke="rgba(255,255,255,0.08)"
+                    stroke-width="0.8"
+                    stroke-dasharray="6,4"
+                  />
+                  <line
+                    x1="0"
+                    y1="80"
+                    x2="500"
+                    y2="80"
+                    stroke="rgba(255,255,255,0.08)"
+                    stroke-width="0.8"
+                    stroke-dasharray="6,4"
+                  />
+                  <line
+                    x1="0"
+                    y1="120"
+                    x2="500"
+                    y2="120"
+                    stroke="rgba(255,255,255,0.08)"
+                    stroke-width="0.8"
+                    stroke-dasharray="6,4"
+                  />
+                  <line
+                    x1="0"
+                    y1="160"
+                    x2="500"
+                    y2="160"
+                    stroke="rgba(255,255,255,0.08)"
+                    stroke-width="0.8"
+                    stroke-dasharray="6,4"
+                  />
+
+                  <!-- Grid Lines - Vertical (more visible) -->
+                  <line
+                    x1="71"
+                    y1="0"
+                    x2="71"
+                    y2="200"
+                    stroke="rgba(255,255,255,0.05)"
+                    stroke-width="0.6"
+                    stroke-dasharray="6,4"
+                  />
+                  <line
+                    x1="142"
+                    y1="0"
+                    x2="142"
+                    y2="200"
+                    stroke="rgba(255,255,255,0.05)"
+                    stroke-width="0.6"
+                    stroke-dasharray="6,4"
+                  />
+                  <line
+                    x1="214"
+                    y1="0"
+                    x2="214"
+                    y2="200"
+                    stroke="rgba(255,255,255,0.05)"
+                    stroke-width="0.6"
+                    stroke-dasharray="6,4"
+                  />
+                  <line
+                    x1="285"
+                    y1="0"
+                    x2="285"
+                    y2="200"
+                    stroke="rgba(255,255,255,0.05)"
+                    stroke-width="0.6"
+                    stroke-dasharray="6,4"
+                  />
+                  <line
+                    x1="357"
+                    y1="0"
+                    x2="357"
+                    y2="200"
+                    stroke="rgba(255,255,255,0.05)"
+                    stroke-width="0.6"
+                    stroke-dasharray="6,4"
+                  />
+                  <line
+                    x1="428"
+                    y1="0"
+                    x2="428"
+                    y2="200"
+                    stroke="rgba(255,255,255,0.05)"
+                    stroke-width="0.6"
+                    stroke-dasharray="6,4"
+                  />
+
+                  <!-- Area under the curve - with smooth gradient -->
+                  <path
+                    d="M0,160 C17,160 18,140 35,140 C52,140 53,120 71,120 C88,120 89,145 107,145 C124,145 125,80 142,80 C159,80 160,105 178,105 C195,105 196,40 214,40 L214,200 L0,200 Z"
+                    fill="url(#areaGradient)"
+                  />
+
+                  <!-- Smooth Curved Line -->
+                  <path
+                    d="M0,160 C17,160 18,140 35,140 C52,140 53,120 71,120 C88,120 89,145 107,145 C124,145 125,80 142,80 C159,80 160,105 178,105 C195,105 196,40 214,40"
+                    fill="none"
+                    stroke="#e63946"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    filter="url(#lineShadow)"
+                  />
+
+                  <!-- Glowing Data Points with outer glow -->
+                  <!-- Day 1 - Mon -->
+                  <circle
+                    cx="0"
+                    cy="160"
+                    r="5"
+                    fill="#e63946"
+                    filter="url(#glow)"
+                  />
+                  <circle
+                    cx="0"
+                    cy="160"
+                    r="2.5"
+                    fill="#ffffff"
+                    opacity="0.9"
+                  />
+
+                  <!-- Day 2 - Tue -->
+                  <circle
+                    cx="35"
+                    cy="140"
+                    r="5"
+                    fill="#e63946"
+                    filter="url(#glow)"
+                  />
+                  <circle
+                    cx="35"
+                    cy="140"
+                    r="2.5"
+                    fill="#ffffff"
+                    opacity="0.9"
+                  />
+
+                  <!-- Day 3 - Wed -->
+                  <circle
+                    cx="71"
+                    cy="120"
+                    r="5"
+                    fill="#e63946"
+                    filter="url(#glow)"
+                  />
+                  <circle
+                    cx="71"
+                    cy="120"
+                    r="2.5"
+                    fill="#ffffff"
+                    opacity="0.9"
+                  />
+
+                  <!-- Day 4 - Thu -->
+                  <circle
+                    cx="107"
+                    cy="145"
+                    r="5"
+                    fill="#e63946"
+                    filter="url(#glow)"
+                  />
+                  <circle
+                    cx="107"
+                    cy="145"
+                    r="2.5"
+                    fill="#ffffff"
+                    opacity="0.9"
+                  />
+
+                  <!-- Day 5 - Fri -->
+                  <circle
+                    cx="142"
+                    cy="80"
+                    r="5"
+                    fill="#e63946"
+                    filter="url(#glow)"
+                  />
+                  <circle
+                    cx="142"
+                    cy="80"
+                    r="2.5"
+                    fill="#ffffff"
+                    opacity="0.9"
+                  />
+
+                  <!-- Day 6 - Sat -->
+                  <circle
+                    cx="178"
+                    cy="105"
+                    r="5"
+                    fill="#e63946"
+                    filter="url(#glow)"
+                  />
+                  <circle
+                    cx="178"
+                    cy="105"
+                    r="2.5"
+                    fill="#ffffff"
+                    opacity="0.9"
+                  />
+
+                  <!-- Day 7 - Sun -->
+                  <circle
+                    cx="214"
+                    cy="40"
+                    r="5"
+                    fill="#e63946"
+                    filter="url(#glow)"
+                  />
+                  <circle
+                    cx="214"
+                    cy="40"
+                    r="2.5"
+                    fill="#ffffff"
+                    opacity="0.9"
+                  />
+                </svg>
+                <div class="line-chart-labels">
+                  <span>Mon</span>
+                  <span>Tue</span>
+                  <span>Wed</span>
+                  <span>Thu</span>
+                  <span>Fri</span>
+                  <span>Sat</span>
+                  <span>Sun</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <!-- ===== NEW: DASHBOARD BOTTOM GRID ===== -->
+<div class="dashboard-bottom-grid">
+
+    <!-- ===== LEFT COLUMN: Low Stock Alert + Perfume Expire Alert ===== -->
+    <div class="dashboard-left-column">
+
+        <!-- Low Stock Alert -->
+        <div class="dashboard-card alert-card">
+            <div class="card-header">
+                <h3>Low Stock Alert</h3>
+                <a href="#" class="card-action-link">View</a>
+            </div>
+            <div class="alert-table-wrapper">
+                <table class="alert-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Size</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Mini Skirt</td>
+                            <td>XL</td>
+                            <td>5</td>
+                            <td><span class="status-badge status-low">Low</span></td>
+                        </tr>
+                        <tr>
+                            <td>Moon Tee</td>
+                            <td>150ml</td>
+                            <td>0</td>
+                            <td><span class="status-badge status-out">Out</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Perfume Expire Alert -->
+        <div class="dashboard-card expire-card">
+            <div class="card-header">
+                <h3>Perfume Expire Alert</h3>
+                <a href="#" class="card-action-link">View</a>
+            </div>
+            <div class="alert-table-wrapper">
+                <table class="alert-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Size</th>
+                            <th>Ex. Date</th>
+                            <th>Days Left</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Raven Noir</td>
+                            <td>200ml</td>
+                            <td>2026-08-15</td>
+                            <td>13</td>
+                            <td><span class="status-badge status-soon">Soon</span></td>
+                        </tr>
+                        <tr>
+                            <td>Moon Tee</td>
+                            <td>150ml</td>
+                            <td>2026-08-01</td>
+                            <td>0</td>
+                            <td><span class="status-badge status-expired">Expired</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== RIGHT COLUMN: Recent Activity ===== -->
+    <div class="dashboard-right-column">
+        <div class="dashboard-card activity-card">
+            <div class="card-header">
+                <h3>Recent Activity</h3>
+            </div>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div class="activity-left">
+                        <span class="activity-amount">P400</span>
+                        <span class="activity-id">— POS-260802-4077</span>
+                    </div>
+                    <div class="activity-right">
+                        <span class="activity-user">by Eydi</span>
+                        <span class="activity-time">5h ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-left">
+                        <span class="activity-amount">P400</span>
+                        <span class="activity-id">— POS-260802-4077</span>
+                    </div>
+                    <div class="activity-right">
+                        <span class="activity-user">by Jimmy</span>
+                        <span class="activity-time">5h ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-left">
+                        <span class="activity-amount">P250</span>
+                        <span class="activity-id">— POS-260802-4065</span>
+                    </div>
+                    <div class="activity-right">
+                        <span class="activity-user">by Admin</span>
+                        <span class="activity-time">12h ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-left">
+                        <span class="activity-amount">P850</span>
+                        <span class="activity-id">— POS-260802-4052</span>
+                    </div>
+                    <div class="activity-right">
+                        <span class="activity-user">by Cashier 1</span>
+                        <span class="activity-time">1d ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-left">
+                        <span class="activity-amount">P1,200</span>
+                        <span class="activity-id">— POS-260802-4041</span>
+                    </div>
+                    <div class="activity-right">
+                        <span class="activity-user">by Admin</span>
+                        <span class="activity-time">2d ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-left">
+                        <span class="activity-amount">P550</span>
+                        <span class="activity-id">— POS-260802-4033</span>
+                    </div>
+                    <div class="activity-right">
+                        <span class="activity-user">by Cashier 2</span>
+                        <span class="activity-time">2d ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===== QUICK ACTIONS - FULL WIDTH ROW ===== -->
+<div class="quick-actions-row">
+    <div class="dashboard-card quick-actions-card">
+        <div class="card-header">
+            <h3>Quick Actions</h3>
+        </div>
+        <div class="quick-actions-grid">
+            <a href="pos.html" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"/>
+                    <circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                <span>New Sale</span>
+            </a>
+            <a href="#" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="10" width="4" height="10" rx="1"/>
+                    <rect x="10" y="6" width="4" height="14" rx="1"/>
+                    <rect x="16" y="2" width="4" height="18" rx="1"/>
+                </svg>
+                <span>Inventory</span>
+            </a>
+            <a href="transactions.html" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <span>Transactions</span>
+            </a>
+            <a href="#" class="quick-action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 2v10l6 4"/>
+                    <path d="M12 2a10 10 0 0 1 8.66 14.4"/>
+                </svg>
+                <span>Reports</span>
+            </a>
+        </div>
+    </div>
+</div>
+          <!-- ===== FOOTER ===== -->
+          <footer class="dashboard-footer">
+            <span>2026 nightbaby</span>
+            <span>Clothing and Perfume</span>
+            <span class="footer-date">Saturday, August 1, 2026</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+    <script src="js/global.js"></script>
+  </body>
+</html>
